@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#14110d">
+<meta name="theme-color" content="#141130">
 <meta name="description" content="0-99 숫자 페그 시스템. 숫자를 누르면 타로카드 그림으로 떠오릅니다.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,15 +12,14 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   :root {
-    --bg: #14110d;
-    --panel: #1f1b15;
-    --panel-2: #2b251c;
-    --line: #3d342715;
-    --edge: #4a4032;
-    --ink: #f4ecdd;
-    --muted: #9a8f7c;
-    --gold: #d8ac4e;
-    --gold-ink: #1a1305;
+    --bg: #141130;            /* 짙은 남보라 */
+    --panel: #1e1a45;
+    --panel-2: #292255;
+    --edge: #423a80;
+    --ink: #f1edff;
+    --muted: #9c95c8;
+    --gold: #e2bb60;
+    --gold-ink: #201703;
     --parchment: #f3e8d0;
     --gap: clamp(6px, 1.6vw, 12px);
     --pad-h: clamp(240px, 46vh, 430px);
@@ -67,7 +66,7 @@
     aspect-ratio: 1 / 1.72; max-height: 100%;
     display: flex; flex-direction: column;
     background: var(--panel); border: 1px solid var(--edge); border-radius: 12px;
-    box-shadow: 0 6px 18px #0007;
+    box-shadow: 0 6px 20px #0000005e;
     overflow: hidden; animation: pop .18s ease-out;
   }
   @keyframes pop { from { transform: scale(.94); opacity: 0 } to { transform: none; opacity: 1 } }
@@ -112,7 +111,7 @@
   .card.hidden .cap .label { color: var(--muted); }
   .card.hidden .qmark {
     display: flex; align-items: center; justify-content: center;
-    width: 100%; height: 100%; font-size: clamp(36px, 14vw, 80px); font-weight: 900; color: #5c5140;
+    width: 100%; height: 100%; font-size: clamp(36px, 14vw, 80px); font-weight: 900; color: #5a52a0;
   }
 
   /* 아무것도 안 눌렀을 때 */
@@ -134,7 +133,7 @@
     font-variant-numeric: tabular-nums;
     width: calc(100% - var(--gap) * 2); max-width: calc(var(--col) - var(--gap) * 2);
   }
-  #display .ph { color: #4a4032; font-size: .6em; letter-spacing: 0; }
+  #display .ph { color: #4d4488; font-size: .6em; letter-spacing: 0; }
   #display .grp:nth-child(even) { color: var(--gold); }
 
   /* ── 키패드 ───────────────────────────────────────── */
@@ -151,11 +150,11 @@
     letter-spacing: -.02em; cursor: pointer; padding: 0;
     transition: transform .06s ease, background .12s ease;
   }
-  #pad button:active { transform: scale(.95); background: #3a3226; }
+  #pad button:active { transform: scale(.95); background: #352d68; }
   #pad button.fn { font-size: clamp(19px, 6vw, 28px); background: var(--panel); color: var(--muted); }
-  #pad button.fn:active { background: #2a241c; }
+  #pad button.fn:active { background: #241f4c; }
   #pad button.enter { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
-  #pad button.enter:active { background: #c4993c; }
+  #pad button.enter:active { background: #cba54f; }
   #pad button:disabled { opacity: .35; }
 
   /* 가로 모드: 카드는 왼쪽, 키패드는 오른쪽 */
@@ -182,13 +181,13 @@
 
 <div id="pad"></div>
 
-<script src="pegs.js"></script>
 <script>
-(() => {
+(async () => {
   "use strict";
 
   const MAX_DIGITS = 6;                 // 최대 카드 3장
-  const PEGS = window.PEG_DATA || {};
+  const PEGS_URL = "data/pegs.json";    // 숫자 → 키워드. 목록은 전부 여기서 온다
+  let PEGS = {};
   const stage = document.getElementById("stage");
   const display = document.getElementById("display");
   const pad = document.getElementById("pad");
@@ -242,7 +241,7 @@
     }
 
     chunks.forEach((key, idx) => {
-      const peg = PEGS[key] || { label: "?" };
+      const label = PEGS[key] || "?";
       const hide = quiz && !revealed.has(idx);
 
       const card = document.createElement("div");
@@ -252,7 +251,7 @@
       pic.className = "pic";
 
       const img = document.createElement("img");
-      img.alt = `${key} ${peg.label}`;
+      img.alt = `${key} ${label}`;
       img.decoding = "async";
       img.src = imgSrc(key);
       img.addEventListener("error", () => card.classList.add("noimg"), { once: true });
@@ -270,7 +269,7 @@
       const cap = document.createElement("div");
       cap.className = "cap";
       cap.innerHTML = `<span class="num">${key}</span>` +
-                      `<span class="label">${hide ? "???" : escapeHtml(peg.label)}</span>`;
+                      `<span class="label">${hide ? "???" : escapeHtml(label)}</span>`;
 
       card.append(pic, cap);
       if (hide) card.addEventListener("click", () => { revealed.add(idx); render(); });
@@ -365,7 +364,25 @@
     else if (e.key === "Escape") press("clear");
   });
 
+  /* ── 페그 목록 불러오기 ───────────────────────────── */
   syncMode();
+  stage.innerHTML = '<div id="hint"><div class="big">페그 목록을 불러오는 중…</div></div>';
+  try {
+    const res = await fetch(PEGS_URL, { cache: "no-cache" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    PEGS = await res.json();
+  } catch (err) {
+    pad.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+    stage.innerHTML =
+      '<div id="hint">' +
+        '<div class="big">페그 목록을 불러오지 못했습니다</div>' +
+        `<div class="sub"><b>${escapeHtml(PEGS_URL)}</b> — ${escapeHtml(String(err.message || err))}<br><br>` +
+        '파일을 그냥 더블클릭해서 열면 브라우저가 JSON 읽기를 막습니다.<br>' +
+        '간단한 웹서버로 여세요: <b>npx http-server docs</b></div>' +
+      '</div>';
+    return;
+  }
+
   syncPad();
   render();
 })();

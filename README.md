@@ -63,7 +63,7 @@ node tools/gen-peg-images.mjs [옵션]
 - 마음에 안 드는 카드 한 장만 다시: `--only 42 --force`
 - 먼저 `--dry-run` 으로 프롬프트를 훑고, `--quality low` 로 몇 장 시험해 본 뒤 전체를 돌리는 편이 싸다.
 
-안전 필터에 걸린 항목은 `SAFETY:` 로 표시된다. `docs/pegs.js` 의 해당 `prompt` 를
+안전 필터에 걸린 항목은 `SAFETY:` 로 표시된다. `docs/data/prompts.json` 의 해당 `prompt` 를
 조금 순화한 뒤 `--only <키> --force` 로 다시 구우면 된다.
 
 ## 폰에서 열기
@@ -73,20 +73,47 @@ node tools/gen-peg-images.mjs [옵션]
 
 ## 구조
 
+데이터는 전부 JSON 이다. 코드에 페그도 프롬프트도 하드코딩되어 있지 않다.
+
 ```
-docs/index.html      웹앱 (의존성 없는 정적 파일 하나)
-docs/pegs.js         페그 110개 — 키워드 + 이미지 프롬프트 (단일 원본)
+docs/data/pegs.json       숫자 → 키워드          {"42": "싸이", ...}
+docs/data/prompts.json    화풍(style) + 장면(items)
+docs/index.html           웹앱. pegs.json 을 fetch 해서 그린다
 docs/img/1/<0-9>.webp     한 자리 카드
 docs/img/2/<00-99>.webp   두 자리 카드
-tools/gen-peg-images.mjs  일괄 생성기 (Node 22, 의존성 없음)
+tools/gen-peg-images.mjs  일괄 생성기 — 위 두 JSON 만 읽는다 (Node 22, 의존성 없음)
 .github/workflows/peg-images.yml
 ```
 
+`prompts.json` 생김새:
+
+```jsonc
+{
+  "style": {
+    "base":       "A symbolist tarot card illustration ...",  // 110장 공통 화풍
+    "noText":     "No text, no lettering, ...",               // 글자 금지
+    "withDigits": "The only lettering anywhere is ..."        // 숫자만 허용
+  },
+  "items": {
+    "42": { "prompt": "A plump reveler in a black tuxedo ..." },
+    "07": { "prompt": "A tuxedoed spy ...", "digits": true }   // digits: 숫자 표기 허용
+  }
+}
+```
+
+최종 프롬프트 = `items[키].prompt` + `style.base` + (`digits` 면 `withDigits`, 아니면 `noText`).
+두 JSON 의 키가 어긋나면 생성기가 실행할 때 경고로 알려준다.
+
 ## 고치기
 
-- **키워드 / 그림 내용**: `docs/pegs.js` 의 `label`, `prompt` 를 고치고 `--only <키> --force`
-- **덱 전체의 화풍**: `tools/gen-peg-images.mjs` 상단의 `STYLE` 문자열 하나만 고치면 110장 인상이 통째로 바뀐다
+- **키워드**: `docs/data/pegs.json` — 고치면 웹앱에 바로 반영된다 (그림 재생성 불필요)
+- **그림 내용**: `docs/data/prompts.json` 의 `items` → `--only <키> --force`
+- **덱 전체의 화풍**: `docs/data/prompts.json` 의 `style.base` 한 곳 — 여기만 고치면 110장 인상이 통째로 바뀐다
 - **자릿수 상한**: `docs/index.html` 의 `MAX_DIGITS`
+- **색**: `docs/index.html` 맨 위 `:root` 변수
+
+웹앱이 JSON 을 `fetch` 하므로 `index.html` 을 더블클릭해서 열면 브라우저가 막는다.
+로컬에서 볼 때는 `npx http-server docs` 처럼 간단한 서버로 열 것. Pages 에서는 그냥 된다.
 
 ## 페그 규칙
 
@@ -97,6 +124,6 @@ tools/gen-peg-images.mjs  일괄 생성기 (Node 22, 의존성 없음)
 | 0 도넛 | 1 촛불 | 2 백조 | 3 엉덩이 | 4 요트 |
 | 5 갈고리 | 6 체리 | 7 부메랑 | 8 눈사람 | 9 콩나물 |
 
-두 자리 100개는 `docs/pegs.js` 에 전부 들어 있다 (00 빵빵 · 42 싸이 · 63 63빌딩 · 96 구루 …).
+두 자리 100개는 `docs/data/pegs.json` 에 전부 들어 있다 (00 빵빵 · 42 싸이 · 63 63빌딩 · 96 구루 …).
 
 기억은 기이할수록 오래 남으므로, 프롬프트는 일부러 낯설고 상징적인 장면으로 썼다.

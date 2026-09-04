@@ -4,7 +4,10 @@
  *
  *   OPENAI_API_KEY=sk-... node tools/gen-peg-images.mjs
  *
- * docs/pegs.js 의 110개 항목을 읽어 docs/img/<자릿수>/<키>.webp 로 저장한다.
+ * 데이터는 전부 JSON 에 있다 (이 파일에 하드코딩된 페그/프롬프트는 없다):
+ *   docs/data/pegs.json     숫자 → 키워드
+ *   docs/data/prompts.json  덱 공통 화풍(style) + 항목별 장면(items)
+ * 읽어서 docs/img/<자릿수>/<키>.webp 로 저장한다.
  * 이미 있는 파일은 건너뛰므로 중간에 끊겨도 그냥 다시 실행하면 이어서 만든다.
  *
  * 옵션
@@ -24,22 +27,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const DATA_FILE = path.join(ROOT, "docs/pegs.js");
+const PEGS_FILE = path.join(ROOT, "docs/data/pegs.json");
+const PROMPTS_FILE = path.join(ROOT, "docs/data/prompts.json");
 const IMG_DIR = path.join(ROOT, "docs/img");
 const ENDPOINT = "https://api.openai.com/v1/images/generations";
-
-/* 110장을 한 덱으로 묶어주는 공통 스타일. 여기를 바꾸면 덱 전체의 인상이 바뀐다. */
-const STYLE = [
-  "A symbolist tarot card illustration in the manner of a hand-painted early twentieth century esoteric arcana deck:",
-  "flat storybook painting with heavy ink outlines, art-nouveau woodcut feeling, and a slim ornate border frame around the scene.",
-  "Limited palette of dull gold, oxblood red, midnight blue, sage green and bone white on aged parchment.",
-  "Strange, dreamlike and faintly mischievous — floating symbols, an oversized moon or sun, drifting stars,",
-  "a checkered floor, twin pillars or heavy drapery.",
-  "One dominant figure or object centered and filling the card, bold silhouette, strong contrast,",
-  "composed so it still reads clearly when shrunk to a thumbnail.",
-].join(" ");
-const NO_TEXT = " No text, no lettering, no roman numerals, no writing on any banner or plaque — leave every banner blank. No watermark, no signature.";
-const SOME_TEXT = " The only lettering anywhere is the few digits described above, engraved plainly. No other text, no title banner writing, no watermark, no signature.";
 
 /* ── 인자 파싱 ────────────────────────────────────────────── */
 const argv = process.argv.slice(2);
@@ -62,19 +53,39 @@ const OPTS = {
 };
 
 /* ── 데이터 로드 ──────────────────────────────────────────── */
-function loadPegs() {
-  const src = fs.readFileSync(DATA_FILE, "utf8");
-  const sandbox = {};
-  new Function("window", src)(sandbox);
-  if (!sandbox.PEG_DATA) throw new Error(`${DATA_FILE} 에서 PEG_DATA 를 찾지 못했습니다.`);
-  return sandbox.PEG_DATA;
+const readJson = (file) => {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch (err) {
+    console.error(`${path.relative(ROOT, file)} 을 읽지 못했습니다: ${err.message}`);
+    process.exit(1);
+  }
+};
+
+const PEGS = readJson(PEGS_FILE);                 // { "42": "싸이", ... }
+const PROMPTS = readJson(PROMPTS_FILE);           // { style: {...}, items: { "42": { prompt, digits? } } }
+const STYLE = PROMPTS.style || {};
+const ITEMS = PROMPTS.items || {};
+
+/* 두 파일이 따로 관리되므로 어긋나면 바로 알려준다 */
+{
+  const noPrompt = Object.keys(PEGS).filter((k) => !ITEMS[k]?.prompt);
+  const noLabel = Object.keys(ITEMS).filter((k) => !PEGS[k]);
+  if (noPrompt.length) console.warn(`! prompts.json 에 없는 페그(건너뜀): ${noPrompt.join(", ")}`);
+  if (noLabel.length) console.warn(`! pegs.json 에 없는 프롬프트(건너뜀): ${noLabel.join(", ")}`);
+  if (!STYLE.base) console.warn("! prompts.json 의 style.base 가 비어 있습니다 — 항목 묘사만으로 생성합니다.");
 }
 
-const PEGS = loadPegs();
 const outPath = (key) => path.join(IMG_DIR, String(key.length), `${key}.${OPTS.format}`);
-const buildPrompt = (peg) => `${peg.prompt}. ${STYLE}${peg.text ? SOME_TEXT : NO_TEXT}`;
+const buildPrompt = (key) => {
+  const item = ITEMS[key];
+  const tail = item.digits ? STYLE.withDigits : STYLE.noText;
+  return [item.prompt, STYLE.base, tail].filter(Boolean).join(". ").replace(/\.\.+/g, ".");
+};
 
-let targets = Object.keys(PEGS).sort((a, b) => a.length - b.length || a.localeCompare(b));
+let targets = Object.keys(PEGS)
+  .filter((k) => ITEMS[k]?.prompt)
+  .sort((a, b) => a.length - b.length || a.localeCompare(b));
 if (OPTS.only.length) {
   const unknown = OPTS.only.filter((k) => !PEGS[k]);
   if (unknown.length) {
@@ -92,7 +103,7 @@ if (OPTS.listMissing) {
 }
 
 if (OPTS.dryRun) {
-  for (const key of targets) console.log(`\n[${key}] ${PEGS[key].label}\n${buildPrompt(PEGS[key])}`);
+  for (const key of targets) console.log(`\n[${key}] ${PEGS[key]}\n${buildPrompt(key)}`);
   console.log(`\n총 ${targets.length}개 (dry-run, 호출하지 않음)`);
   process.exit(0);
 }
@@ -112,10 +123,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let model = OPTS.model;
 const dropped = new Set();
 
-function body(peg) {
+function body(key) {
   const b = {
     model,
-    prompt: buildPrompt(peg),
+    prompt: buildPrompt(key),
     n: 1,
     size: OPTS.size,
     quality: OPTS.quality,
@@ -127,7 +138,6 @@ function body(peg) {
 }
 
 async function generate(key) {
-  const peg = PEGS[key];
   const MAX = 6;
   for (let attempt = 1; attempt <= MAX; attempt++) {
     let res, text;
@@ -135,7 +145,7 @@ async function generate(key) {
       res = await fetch(ENDPOINT, {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${API_KEY}` },
-        body: JSON.stringify(body(peg)),
+        body: JSON.stringify(body(key)),
       });
       text = await res.text();
     } catch (err) {
@@ -204,14 +214,14 @@ const queue = [...targets];
 async function worker() {
   while (queue.length) {
     const key = queue.shift();
-    const peg = PEGS[key];
+    const label = PEGS[key];
     try {
       const file = await generate(key);
       done++;
-      console.log(`✔ [${String(done).padStart(3)}/${targets.length}] ${key.padEnd(2)} ${peg.label} → ${path.relative(ROOT, file)}`);
+      console.log(`✔ [${String(done).padStart(3)}/${targets.length}] ${key.padEnd(2)} ${label} → ${path.relative(ROOT, file)}`);
     } catch (err) {
-      failed.push({ key, label: peg.label, reason: String(err.message || err) });
-      console.error(`✘ ${key} ${peg.label} — ${err.message || err}`);
+      failed.push({ key, label, reason: String(err.message || err) });
+      console.error(`✘ ${key} ${label} — ${err.message || err}`);
     }
   }
 }
@@ -222,6 +232,6 @@ console.log(`\n완료: ${done}개 성공, ${failed.length}개 실패`);
 if (failed.length) {
   for (const f of failed) console.log(`  - ${f.key} ${f.label}: ${f.reason}`);
   console.log(`\n실패분만 다시: node tools/gen-peg-images.mjs --only ${failed.map((f) => f.key).join(",")}`);
-  console.log("SAFETY 로 거부된 항목은 docs/pegs.js 의 prompt 를 순화한 뒤 다시 돌리면 됩니다.");
+  console.log("SAFETY 로 거부된 항목은 docs/data/prompts.json 의 prompt 를 순화한 뒤 다시 돌리면 됩니다.");
   process.exit(1);
 }
