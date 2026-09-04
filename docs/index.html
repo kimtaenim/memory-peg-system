@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#141130">
-<meta name="description" content="0-99 숫자 페그 시스템. 숫자를 누르면 타로카드 그림으로 떠오릅니다.">
+<meta name="description" content="0-99 숫자 페그. 숫자를 누르면 그림으로 떠오릅니다.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,7 +13,7 @@
 <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>숫자 페그 — 타로 덱으로 외우는 0-99</title>
+<title>숫자 페그</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   :root {
@@ -209,7 +209,7 @@
 
 <div class="lhs">
   <header>
-    <div class="brand"><b>숫자 페그</b> · 0–99 타로 덱</div>
+    <div class="brand"><b>숫자 페그</b> · 0–99</div>
     <button id="mode" type="button" aria-pressed="false">즉시</button>
   </header>
 
@@ -278,7 +278,7 @@
     if (!chunks.length) {
       stage.innerHTML =
         '<div id="hint">' +
-          '<div class="big">숫자를 누르면 카드가 뒤집힙니다</div>' +
+          '<div class="big">숫자를 누르면 그림이 뜹니다</div>' +
           '<div class="sub"><b>8396</b> → 빨간 삼각팬티 + 구루<br>' +
           '<b>542</b> → 갈고리 + 싸이<br>' +
           '홀수 자리는 맨 앞 한 자리부터 끊습니다</div>' +
@@ -407,7 +407,7 @@
   function syncMode() {
     modeBtn.textContent = quiz ? "퀴즈" : "즉시";
     modeBtn.setAttribute("aria-pressed", String(quiz));
-    modeBtn.title = quiz ? "숫자를 다 누르고 ⏎ 를 눌러야 카드가 열립니다" : "누르는 대로 바로 카드가 열립니다";
+    modeBtn.title = quiz ? "숫자를 다 누르고 ⏎ 를 눌러야 그림이 열립니다" : "누르는 대로 바로 그림이 열립니다";
   }
   modeBtn.addEventListener("click", () => {
     quiz = !quiz;

@@ -1,7 +1,7 @@
 {
-  "name": "숫자 페그 — 0-99 타로 덱",
+  "name": "숫자 페그",
   "short_name": "숫자 페그",
-  "description": "숫자를 누르면 타로카드로 떠오르는 0-99 페그 시스템",
+  "description": "숫자를 누르면 그림으로 떠오르는 0-99 숫자 페그",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
