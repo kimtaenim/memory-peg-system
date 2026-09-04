@@ -1,6 +1,6 @@
 {
   "style": {
-    "base": "A symbolist tarot card illustration in the manner of a hand-painted early twentieth century esoteric arcana deck: flat storybook painting with heavy ink outlines, art-nouveau woodcut feeling, and a slim ornate border frame around the scene. Limited palette of dull gold, oxblood red, midnight blue, sage green and bone white on aged parchment. Strange, dreamlike and faintly mischievous — floating symbols, an oversized moon or sun, drifting stars, a checkered floor, twin pillars or heavy drapery. One dominant figure or object centered and filling the card, bold silhouette, strong contrast, composed so it still reads clearly when shrunk to a thumbnail.",
+    "base": "A symbolist tarot card illustration in the manner of a hand-painted early twentieth century esoteric arcana deck: flat storybook painting with heavy ink outlines, art-nouveau woodcut feeling, and a slim ornate border frame around the scene. Limited palette of dull gold, oxblood red, midnight blue, sage green and bone white on aged parchment. The subject fills most of the card — large, close and theatrical. People are painted in the sensual, uncanny manner of symbolist painters like Klimt, Moreau and Khnopff: languid poses, heavy-lidded sidelong gazes, bare shoulders and clinging drapery, faintly erotic but never explicit. When the peg is an object, it stays the clear focus — enormous, or held and presented by such a figure. Instead of scenery, the space around the subject is M. C. Escher-like impossible geometry: a Penrose triangle, staircases that climb into themselves, tessellating tiles that turn into birds or fish, columns that cannot exist. No moon anywhere. Strange, dreamlike and faintly mischievous; bold silhouette, strong contrast, composed so it still reads clearly when shrunk to a thumbnail.",
     "noText": "Apart from that number there is no other text, no lettering, no roman numerals, no watermark, no signature.",
     "withDigits": "Apart from that number and the few digits described in the scene there is no other text, no lettering, no watermark, no signature.",
     "number": "The card's own number {n} is painted large, bold and centered in the banner at the bottom of the card, in the same aged-ink lettering as the rest of the card."
@@ -19,7 +19,7 @@
       "prompt": "A plump figure in polka-dot bloomers bending over and seen from behind, two round cheeks forming a heart shape, a startled cherub peeking out from behind a heavy curtain, comic and fully clothed"
     },
     "4": {
-      "prompt": "A small yacht with one taut triangular sail crossing a moonlit sea, a hand rising from the waves to steady the mast"
+      "prompt": "A small yacht with one taut triangular sail crossing a black sea, a pale hand rising from the waves to steady the mast, a lantern at the prow"
     },
     "5": {
       "prompt": "A steel pirate hook strapped to a wooden arm cuff, hanging from a chain against a storm sky, one silver fish dangling from its point"
@@ -31,7 +31,7 @@
       "prompt": "A carved wooden boomerang in flight tracing a glowing arc across a desert sky, returning toward an outstretched hand"
     },
     "8": {
-      "prompt": "A snowman with a bucket for a crown and coal for eyes standing in a silent white field beneath a huge pale moon, twig arms raised like a magician"
+      "prompt": "A snowman with a bucket for a crown and coal for eyes standing alone in a silent white field, twig arms raised like a magician, a single crow on its shoulder"
     },
     "9": {
       "prompt": "A single bean sprout with a golden head and long pale tail growing out of a cracked earthen jar, roots spilling like hair, small stars drifting around it"
@@ -76,7 +76,7 @@
       "prompt": "A caped surgeon with a long stitched scar and two-toned black and white hair raising a scalpel like a wand, surgical lamps burning above him like suns"
     },
     "22": {
-      "prompt": "A white-robed Confucian scholar seated beneath a plum tree with an open book on his knee, a crane standing at his side"
+      "prompt": "Yi I (Yulgok), the Joseon Confucian scholar, in white robes seated beneath a plum tree with an open book on his knee, a crane standing at his side"
     },
     "23": {
       "prompt": "A shimmering gown on a headless dress form beneath a spotlight, jewels raining down, a mirror behind it reflecting an empty dress"
@@ -124,7 +124,7 @@
       "prompt": "A great silver-blue tuna leaping from the sea with its body arced, a fishing line snapping in two"
     },
     "38": {
-      "prompt": "A barbed wire line drawn straight across a moonlit field, two helmeted soldiers facing one another, a single bird perched on the wire between them"
+      "prompt": "A barbed wire line drawn straight across a grey field at dusk, two helmeted soldiers facing one another, a single bird perched on the wire between them"
     },
     "39": {
       "prompt": "Three sworn brothers kneeling in a peach blossom garden with their hands joined over a burning brazier, petals falling around them"
@@ -136,10 +136,10 @@
       "prompt": "A fan of felt-tip pens rising like a bouquet, one uncapped and drawing a glowing ribbon of color through the air"
     },
     "42": {
-      "prompt": "A short plump Korean man with a round face, slicked-back black hair, small black sunglasses and a black bow tie, wearing a sky-blue tuxedo jacket with black lapels over a white shirt, caught mid-bounce in a horse-riding dance — knees bent, wrists crossed in front as if holding reins — between two pillars, golden lassos looping around him, a horse-headed moon watching from above"
+      "prompt": "A short plump Korean man with a round face, slicked-back black hair, small black sunglasses and a black bow tie, wearing a sky-blue tuxedo jacket with black lapels over a white shirt, caught mid-bounce in a horse-riding dance — knees bent, wrists crossed in front as if holding reins — golden lassos looping around him, a horse's head emerging from the geometry above"
     },
     "43": {
-      "prompt": "A great antlered stag standing in a clearing, its antlers branching upward into bare trees, moonlight caught between them"
+      "prompt": "A great antlered stag standing in a clearing, its antlers branching upward into bare trees, a lantern light caught between them"
     },
     "44": {
       "prompt": "A pale reaper in a black gat hat and black durumagi robe holding an unrolled summons scroll, blue mist at his feet, an empty road stretching behind him"
@@ -193,10 +193,10 @@
       "prompt": "A petrol station attendant in a peaked cap holding a fuel nozzle like a sceptre, an old pump beside him, a road running to the horizon"
     },
     "61": {
-      "prompt": "A Joseon scholar in traditional robes carrying a western leather suitcase and umbrella, a steamship and foreign spires behind him, his shadow still wearing a scholar's hat"
+      "prompt": "Yu Kil-chun, the Joseon scholar, in traditional robes carrying a western leather suitcase and umbrella, a steamship and foreign spires behind him, his shadow still wearing a scholar's hat"
     },
     "62": {
-      "prompt": "A plump king in a towering powdered wig and gold coat posing haughtily on a checkered floor, a great cake beside him and the shadow of a blade behind"
+      "prompt": "King Louis XVI of France, plump in a towering powdered wig and gold coat, posing haughtily, a great cake beside him and the shadow of a blade behind"
     },
     "63": {
       "prompt": "A tall golden mirrored tower rising beside a wide river at dusk, its reflection doubling it into one shining column"
@@ -205,7 +205,7 @@
       "prompt": "Bright yellow bumpy yuzu fruits on a leafy branch, one sliced open, its scent drawn as spiraling golden lines"
     },
     "65": {
-      "prompt": "A stern marshal in a white uniform heavy with medals standing with folded arms, ribbons behind him and a map torn into pieces at his feet"
+      "prompt": "Josip Broz Tito, the Yugoslav marshal, in a white uniform heavy with medals standing with folded arms, ribbons behind him and a map torn into pieces at his feet"
     },
     "66": {
       "prompt": "A skyline of towers with a crowned torch-bearing colossus rising among them, a yellow cab below, steam curling up from the street"
@@ -236,13 +236,13 @@
       "prompt": "A coil of steel wire with pliers bending one strand into a closed loop, sparks where the metal turns"
     },
     "75": {
-      "prompt": "A bearded writer in pince-nez glasses at a desk, a rifle mounted on the wall behind him and a seagull passing the window, a cherry branch in a jar"
+      "prompt": "Anton Chekhov, the Russian writer, bearded with pince-nez glasses at a desk, a rifle mounted on the wall behind him and a seagull passing the window, a cherry branch in a jar"
     },
     "76": {
       "prompt": "A school tracksuit laid out like ceremonial vestments with sneakers and a whistle, a running track curving away behind it"
     },
     "77": {
-      "prompt": "A round grey chinchilla with huge ears sitting upright nibbling a pellet, moon-pale fur, a small heap of bathing dust beside it"
+      "prompt": "A round grey chinchilla with huge ears sitting upright nibbling a pellet, ash-pale fur, a small heap of bathing dust beside it"
     },
     "78": {
       "prompt": "A red silk qipao with gold embroidery on a dress form, a folding fan open beside it, lanterns hanging above"
@@ -260,7 +260,7 @@
       "prompt": "An enormous fly with iridescent wings rubbing its front legs together on the rim of a cup, an iron tower far off in the haze behind"
     },
     "83": {
-      "prompt": "A skimpy bright red thong — a tiny triangle of cloth on thin string straps — pegged to a clothesline and snapping in the wind like a banner, a blushing plump moustached man in a bathrobe stretching up on tiptoe to grab it, the moon peeking out between its fingers in mock shock"
+      "prompt": "A skimpy bright red thong — a tiny triangle of cloth on thin string straps — pegged to a clothesline and snapping in the wind like a banner, a blushing plump moustached man in a bathrobe stretching up on tiptoe to grab it, a sun peeking out between its fingers in mock shock"
     },
     "84": {
       "prompt": "A rocket tearing off its launch pad in a pillar of flame, the service tower falling away, stars streaking overhead"
@@ -296,7 +296,7 @@
       "prompt": "A boiled pig's head smiling on a ritual table with folded banknotes tucked into its mouth, rice cakes and a candle before it, bowing shadows behind"
     },
     "95": {
-      "prompt": "A red-bearded painter in a straw hat with a bandaged ear holding a palette and a fistful of sunflowers, the night sky behind him churning into spirals"
+      "prompt": "Vincent van Gogh, red-bearded in a straw hat with a bandaged ear, holding a palette and a fistful of sunflowers, the sky behind him churning into spirals"
     },
     "96": {
       "prompt": "A white-bearded guru in a turban floating cross-legged above his mat, incense smoke coiling into symbols, disciples seated below him"
@@ -320,7 +320,7 @@
       "prompt": "A Joseon chief state councillor in crimson robes and black horsehair hat seated between two pillars, holding a wooden court tablet like a scroll of law"
     },
     "03": {
-      "prompt": "An elderly statesman in a white jogging suit and headband running in place on a checkered floor, a ballot box beside him and a rising sun behind"
+      "prompt": "Kim Young-sam, former president of South Korea, as an elderly statesman in a white jogging suit and headband running in place, a ballot box beside him and a rising sun behind"
     },
     "04": {
       "prompt": "A peacock fanning a tail of a hundred feather-eyes, every eye open and watching the viewer"
