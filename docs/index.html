@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#14110d">
+<meta name="description" content="0-99 숫자 페그 시스템. 숫자를 누르면 타로카드 그림으로 떠오릅니다.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>숫자 페그 — 타로 덱으로 외우는 0-99</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --bg: #14110d;
+    --panel: #1f1b15;
+    --panel-2: #2b251c;
+    --line: #3d342715;
+    --edge: #4a4032;
+    --ink: #f4ecdd;
+    --muted: #9a8f7c;
+    --gold: #d8ac4e;
+    --gold-ink: #1a1305;
+    --parchment: #f3e8d0;
+    --gap: clamp(6px, 1.6vw, 12px);
+    --pad-h: clamp(240px, 46vh, 430px);
+    --col: 540px;              /* 큰 화면에서 가운데로 모으는 폭 */
+  }
+  html, body { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
+  body {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard",
+                 "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .lhs { display: contents; }
+  header, #stage, #display, #pad { width: 100%; max-width: var(--col); margin-inline: auto; }
+
+  /* ── 헤더 ─────────────────────────────────────────── */
+  header {
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; padding: 6px var(--gap) 2px;
+  }
+  .brand { font-size: clamp(12px, 3.2vw, 15px); font-weight: 700; letter-spacing: -.02em; color: var(--muted); }
+  .brand b { color: var(--ink); }
+  #mode {
+    appearance: none; border: 1px solid var(--edge); background: var(--panel);
+    color: var(--ink); border-radius: 999px; padding: 6px 14px;
+    font: inherit; font-size: clamp(11px, 3vw, 14px); font-weight: 700; cursor: pointer;
+  }
+  #mode[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
+
+  /* ── 카드 ─────────────────────────────────────────── */
+  #stage {
+    flex: 1 1 auto; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+    gap: var(--gap); padding: 0 var(--gap);
+  }
+  .card {
+    flex: 1 1 0; min-width: 0; min-height: 0;
+    aspect-ratio: 1 / 1.72; max-height: 100%;
+    display: flex; flex-direction: column;
+    background: var(--panel); border: 1px solid var(--edge); border-radius: 12px;
+    box-shadow: 0 6px 18px #0007;
+    overflow: hidden; animation: pop .18s ease-out;
+  }
+  @keyframes pop { from { transform: scale(.94); opacity: 0 } to { transform: none; opacity: 1 } }
+  #stage[data-n="1"] .card { flex: 0 0 auto; width: 48%; }
+
+  .card .pic {
+    flex: 1 1 auto; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--parchment); padding: 3px;
+  }
+  .card img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  /* 이미지가 아직 없을 때(생성 전) 자리표시 */
+  .card .fallback {
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    width: 100%; height: 100%; gap: 2px; background: var(--panel-2);
+    font-weight: 800; text-align: center; padding: 4px; line-height: 1.15;
+  }
+  .card .fallback .fnum { font-size: clamp(26px, 10vw, 60px); color: var(--gold); letter-spacing: -.04em; }
+  .card .fallback .fhint { font-size: clamp(9px, 2.4vw, 12px); font-weight: 600; color: var(--muted); }
+  .card.noimg .pic { background: var(--panel-2); padding: 0; }
+  .card.noimg img { display: none; }
+  .card.noimg .fallback { display: flex; }
+
+  .card .cap {
+    flex: 0 0 auto; display: flex; align-items: baseline; justify-content: center;
+    gap: 6px; padding: 6px 6px 8px; border-top: 1px solid var(--edge);
+  }
+  .card .num {
+    font-size: clamp(14px, 4.4vw, 21px); font-weight: 900; color: var(--gold);
+    letter-spacing: -.03em; font-variant-numeric: tabular-nums;
+  }
+  .card .label {
+    font-size: clamp(12px, 3.8vw, 18px); font-weight: 800; letter-spacing: -.03em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+  }
+
+  /* 퀴즈 모드에서 아직 안 보여준 카드 */
+  .qmark { display: none; }
+  .card.hidden .pic { background: var(--panel-2); }
+  .card.hidden img { display: none; }
+  .card.hidden.noimg .fallback { display: none; }
+  .card.hidden .cap .label { color: var(--muted); }
+  .card.hidden .qmark {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%; font-size: clamp(36px, 14vw, 80px); font-weight: 900; color: #5c5140;
+  }
+
+  /* 아무것도 안 눌렀을 때 */
+  #hint {
+    flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; text-align: center; color: var(--muted); padding: 0 20px;
+  }
+  #hint .big { font-size: clamp(15px, 4.4vw, 21px); font-weight: 800; color: var(--ink); letter-spacing: -.03em; }
+  #hint .sub { font-size: clamp(12px, 3.3vw, 15px); line-height: 1.65; }
+  #hint .sub b { color: var(--gold); font-variant-numeric: tabular-nums; }
+
+  /* ── 입력 표시 ────────────────────────────────────── */
+  #display {
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center; gap: .35em;
+    height: clamp(44px, 8.5vh, 62px); margin-top: var(--gap);
+    background: var(--panel); border: 1px solid var(--edge); border-radius: 12px;
+    font-size: clamp(24px, 8vw, 38px); font-weight: 900; letter-spacing: .04em;
+    font-variant-numeric: tabular-nums;
+    width: calc(100% - var(--gap) * 2); max-width: calc(var(--col) - var(--gap) * 2);
+  }
+  #display .ph { color: #4a4032; font-size: .6em; letter-spacing: 0; }
+  #display .grp:nth-child(even) { color: var(--gold); }
+
+  /* ── 키패드 ───────────────────────────────────────── */
+  #pad {
+    flex: 0 0 auto; height: var(--pad-h);
+    display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr;
+    gap: var(--gap); padding: var(--gap);
+  }
+  #pad button {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--panel-2); color: var(--ink);
+    border: 1px solid var(--edge); border-radius: 14px;
+    font-family: inherit; font-size: clamp(24px, 8vw, 38px); font-weight: 800;
+    letter-spacing: -.02em; cursor: pointer; padding: 0;
+    transition: transform .06s ease, background .12s ease;
+  }
+  #pad button:active { transform: scale(.95); background: #3a3226; }
+  #pad button.fn { font-size: clamp(19px, 6vw, 28px); background: var(--panel); color: var(--muted); }
+  #pad button.fn:active { background: #2a241c; }
+  #pad button.enter { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
+  #pad button.enter:active { background: #c4993c; }
+  #pad button:disabled { opacity: .35; }
+
+  /* 가로 모드: 카드는 왼쪽, 키패드는 오른쪽 */
+  @media (orientation: landscape) and (max-height: 560px) {
+    body { flex-direction: row; }
+    .lhs { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; max-width: none; }
+    header, #stage, #display { max-width: none; }
+    #pad { height: auto; width: min(44vw, 320px); max-width: none; margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="lhs">
+  <header>
+    <div class="brand"><b>숫자 페그</b> · 0–99 타로 덱</div>
+    <button id="mode" type="button" aria-pressed="false">즉시</button>
+  </header>
+
+  <section id="stage" aria-live="polite"></section>
+
+  <div id="display"><span class="ph">숫자를 누르세요</span></div>
+</div>
+
+<div id="pad"></div>
+
+<script src="pegs.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  const MAX_DIGITS = 6;                 // 최대 카드 3장
+  const PEGS = window.PEG_DATA || {};
+  const stage = document.getElementById("stage");
+  const display = document.getElementById("display");
+  const pad = document.getElementById("pad");
+  const modeBtn = document.getElementById("mode");
+
+  let digits = "";
+  let quiz = localStorage.getItem("peg.quiz") === "1";
+  const revealed = new Set();           // 퀴즈 모드에서 공개된 카드 index
+
+  /* 8396 → ["83","96"],  542 → ["5","42"] : 홀수면 맨 앞만 한 자리 */
+  function chunk(s) {
+    const out = [];
+    let i = 0;
+    if (s.length % 2 === 1) { out.push(s[0]); i = 1; }
+    for (; i < s.length; i += 2) out.push(s.slice(i, i + 2));
+    return out;
+  }
+
+  const imgSrc = (key) => `img/${key.length}/${key}.webp`;
+
+  const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  /* ── 그리기 ───────────────────────────────────────── */
+  function render() {
+    const chunks = chunk(digits);
+
+    display.innerHTML = "";
+    if (!chunks.length) {
+      display.innerHTML = '<span class="ph">숫자를 누르세요</span>';
+    } else {
+      for (const c of chunks) {
+        const el = document.createElement("span");
+        el.className = "grp";
+        el.textContent = c;
+        display.appendChild(el);
+      }
+    }
+
+    stage.innerHTML = "";
+    stage.dataset.n = String(chunks.length);
+    if (!chunks.length) {
+      stage.innerHTML =
+        '<div id="hint">' +
+          '<div class="big">숫자를 누르면 카드가 뒤집힙니다</div>' +
+          '<div class="sub"><b>8396</b> → 빨간 삼각팬티 + 구루<br>' +
+          '<b>542</b> → 갈고리 + 싸이<br>' +
+          '홀수 자리는 맨 앞 한 자리부터 끊습니다</div>' +
+        '</div>';
+      return;
+    }
+
+    chunks.forEach((key, idx) => {
+      const peg = PEGS[key] || { label: "?" };
+      const hide = quiz && !revealed.has(idx);
+
+      const card = document.createElement("div");
+      card.className = "card" + (hide ? " hidden" : "");
+
+      const pic = document.createElement("div");
+      pic.className = "pic";
+
+      const img = document.createElement("img");
+      img.alt = `${key} ${peg.label}`;
+      img.decoding = "async";
+      img.src = imgSrc(key);
+      img.addEventListener("error", () => card.classList.add("noimg"), { once: true });
+
+      const fb = document.createElement("div");
+      fb.className = "fallback";
+      fb.innerHTML = `<div class="fnum">${key}</div><div class="fhint">그림 생성 전</div>`;
+
+      const qm = document.createElement("div");
+      qm.className = "qmark";
+      qm.textContent = "?";
+
+      pic.append(img, fb, qm);
+
+      const cap = document.createElement("div");
+      cap.className = "cap";
+      cap.innerHTML = `<span class="num">${key}</span>` +
+                      `<span class="label">${hide ? "???" : escapeHtml(peg.label)}</span>`;
+
+      card.append(pic, cap);
+      if (hide) card.addEventListener("click", () => { revealed.add(idx); render(); });
+      stage.appendChild(card);
+    });
+  }
+
+  /* ── 입력 ─────────────────────────────────────────── */
+  const tap = (ms) => { if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} } };
+
+  function press(key) {
+    if (key === "back") {
+      if (!digits) return;
+      digits = digits.slice(0, -1);
+      revealed.clear();
+      tap(8);
+    } else if (key === "enter") {
+      if (quiz && digits && revealed.size < chunk(digits).length) {
+        chunk(digits).forEach((_, i) => revealed.add(i));   // 첫 엔터: 정답 공개
+      } else {
+        digits = "";                                        // 다음 숫자로
+        revealed.clear();
+      }
+      tap(16);
+    } else if (key === "clear") {
+      digits = "";
+      revealed.clear();
+      tap(20);
+    } else {
+      if (digits.length >= MAX_DIGITS) { tap(30); return; }
+      digits += key;
+      revealed.clear();
+      tap(8);
+    }
+    syncPad();
+    render();
+  }
+
+  function syncPad() {
+    const full = digits.length >= MAX_DIGITS;
+    pad.querySelectorAll("button[data-num]").forEach((b) => { b.disabled = full; });
+    pad.querySelector('[data-key="back"]').disabled = !digits;
+  }
+
+  /* ── 키패드 ───────────────────────────────────────── */
+  const layout = [["1","2","3"], ["4","5","6"], ["7","8","9"], ["back","0","enter"]];
+  for (const row of layout) {
+    for (const k of row) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.key = k;
+      if (k === "back") {
+        b.className = "fn"; b.textContent = "⌫";
+        b.setAttribute("aria-label", "한 자리 지우기 (길게 누르면 전체 삭제)");
+        let timer = null;
+        b.addEventListener("pointerdown", () => { timer = setTimeout(() => { timer = null; press("clear"); }, 500); });
+        b.addEventListener("pointerup", (e) => { if (timer) { clearTimeout(timer); timer = null; press("back"); } e.preventDefault(); });
+        const cancel = () => { clearTimeout(timer); timer = null; };
+        b.addEventListener("pointerleave", cancel);
+        b.addEventListener("pointercancel", cancel);
+      } else if (k === "enter") {
+        b.className = "fn enter"; b.textContent = "⏎";
+        b.setAttribute("aria-label", "확인");
+        b.addEventListener("click", () => press("enter"));
+      } else {
+        b.dataset.num = k; b.textContent = k;
+        b.addEventListener("click", () => press(k));
+      }
+      pad.appendChild(b);
+    }
+  }
+
+  /* ── 모드 ─────────────────────────────────────────── */
+  function syncMode() {
+    modeBtn.textContent = quiz ? "퀴즈" : "즉시";
+    modeBtn.setAttribute("aria-pressed", String(quiz));
+    modeBtn.title = quiz ? "숫자를 다 누르고 ⏎ 를 눌러야 카드가 열립니다" : "누르는 대로 바로 카드가 열립니다";
+  }
+  modeBtn.addEventListener("click", () => {
+    quiz = !quiz;
+    localStorage.setItem("peg.quiz", quiz ? "1" : "0");
+    revealed.clear();
+    syncMode();
+    render();
+  });
+
+  /* 물리 키보드 (데스크톱) */
+  addEventListener("keydown", (e) => {
+    if (e.key >= "0" && e.key <= "9") press(e.key);
+    else if (e.key === "Backspace") { e.preventDefault(); press("back"); }
+    else if (e.key === "Enter") press("enter");
+    else if (e.key === "Escape") press("clear");
+  });
+
+  syncMode();
+  syncPad();
+  render();
+})();
+</script>
+</body>
+</html>

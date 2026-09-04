@@ -1,0 +1,85 @@
+name: peg-images
+
+# 숫자 페그 타로카드를 OpenAI 이미지 API로 일괄 생성해서 커밋한다.
+#
+# 사전 준비 (딱 한 번):
+#   Settings → Secrets and variables → Actions → New repository secret
+#   Name: OPENAI_API_KEY   Secret: sk-...
+#
+# 실행: Actions 탭 → peg-images → Run workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: '특정 키만 (쉼표 구분, 예: 5,42,83). 비우면 아직 없는 것 전부'
+        required: false
+        default: ''
+      quality:
+        description: '화질 low / medium / high'
+        required: false
+        default: 'medium'
+      size:
+        description: '크기 (세로 타로카드는 1024x1536)'
+        required: false
+        default: '1024x1536'
+      model:
+        description: '이미지 모델'
+        required: false
+        default: 'gpt-image-2'
+      force:
+        description: '이미 있는 파일도 다시 생성'
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: peg-images
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate peg cards
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ONLY: ${{ inputs.only }}
+          QUALITY: ${{ inputs.quality }}
+          SIZE: ${{ inputs.size }}
+          MODEL: ${{ inputs.model }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::OPENAI_API_KEY 시크릿이 없습니다. Settings → Secrets and variables → Actions 에서 등록하세요."
+            exit 1
+          fi
+          args=(--model "$MODEL" --quality "$QUALITY" --size "$SIZE")
+          [ -n "$ONLY" ] && args+=(--only "$ONLY")
+          [ "$FORCE" = "true" ] && args+=(--force)
+          node tools/gen-peg-images.mjs "${args[@]}"
+
+      - name: Commit & push
+        if: always()
+        run: |
+          git config user.name "peg-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/img
+          if git diff --cached --quiet; then
+            echo "새로 만들어진 카드 없음"
+          else
+            n=$(git diff --cached --name-only | wc -l)
+            git commit -m "peg: 카드 생성 (${n}장)"
+            git pull --rebase origin "${{ github.ref_name }}"
+            git push origin HEAD:"${{ github.ref_name }}"
+          fi
