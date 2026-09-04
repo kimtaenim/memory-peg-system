@@ -54,9 +54,16 @@ node tools/gen-peg-images.mjs [옵션]
   --quality <등급>   low | medium | high  (기본 medium)
   --format <형식>    webp | png  (기본 webp)
   --concurrency <n>  동시 요청 수 (기본 3)
+  --max-width <px>   저장 전에 cwebp 로 축소 (기본 768, 0이면 원본 유지)
+  --webp-quality <q> 축소할 때 webp 품질 (기본 82)
   --dry-run          호출 없이 최종 프롬프트만 출력
   --list-missing     아직 없는 키만 나열
 ```
+
+API 가 주는 webp 는 1024×1536 무손실이라 **장당 2MB 가 넘는다.** 폰에서는 카드 한 장이
+600px 을 넘지 않으니 `cwebp` 가 있으면 768px·q82 로 줄여 **~200KB** 로 저장한다 (110장 ≈ 22MB).
+Actions 러너에는 자동으로 깔리고, 로컬은 `brew install webp` / `sudo apt install webp` /
+`winget install Google.libwebp`. 없으면 경고만 내고 API 쪽 압축만 적용된 채 저장한다.
 
 - 이미 만들어진 파일은 **건너뛴다.** 중간에 끊겨도 그냥 다시 실행하면 이어서 만든다.
 - 429/5xx 는 지수 백오프로 재시도하고, 계정이 지원하지 않는 파라미터는 빼고 다시 던진다.

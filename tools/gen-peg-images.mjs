@@ -18,12 +18,20 @@
  *   --quality <등급>   low | medium | high   (기본 medium)
  *   --format <형식>    webp | png            (기본 webp)
  *   --concurrency <n>  동시 요청 수          (기본 3)
+ *   --max-width <px>   저장 전에 cwebp 로 이 너비로 축소 (기본 768, 0이면 원본 유지)
+ *   --webp-quality <q> 축소할 때 webp 품질     (기본 82)
  *   --dry-run          호출 없이 최종 프롬프트만 출력
  *   --list-missing     아직 없는 키만 나열하고 종료
+ *
+ * API 가 주는 webp 는 1024x1536 무손실이라 장당 2MB 가 넘는다. 폰에서는 3장 나란히
+ * 띄워도 카드 한 장이 600px 을 넘지 않으므로 cwebp(libwebp) 가 깔려 있으면 768px 로
+ * 줄여 ~200KB 로 저장한다. cwebp 가 없으면 API 쪽 압축(output_compression)만 적용된다.
+ *   설치: macOS `brew install webp` / Ubuntu `sudo apt install webp` / Windows `winget install Google.libwebp`
  */
 
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -48,6 +56,8 @@ const OPTS = {
   quality: opt("quality", "medium"),
   format: opt("format", "webp"),
   concurrency: Math.max(1, Number(opt("concurrency", "3")) || 3),
+  maxWidth: Math.max(0, Number(opt("max-width", "768")) || 0),
+  webpQuality: Math.min(100, Math.max(1, Number(opt("webp-quality", "82")) || 82)),
   dryRun: flag("dry-run"),
   listMissing: flag("list-missing"),
 };
@@ -116,6 +126,28 @@ if (!API_KEY) {
   process.exit(1);
 }
 
+/* ── 축소 (cwebp) ─────────────────────────────────────────── */
+const HAS_CWEBP = spawnSync("cwebp", ["-version"], { stdio: "ignore" }).status === 0;
+const WILL_SHRINK = HAS_CWEBP && OPTS.maxWidth > 0 && OPTS.format === "webp";
+if (!HAS_CWEBP && OPTS.maxWidth > 0 && OPTS.format === "webp") {
+  console.warn("! cwebp 가 없어 축소를 건너뜁니다 — 장당 수백 KB 로 저장됩니다. (brew/apt install webp)");
+}
+
+/* API 가 준 파일을 maxWidth 로 줄여 제자리에 덮어쓴다. 실패하면 원본을 그대로 둔다. */
+function shrink(file) {
+  if (!WILL_SHRINK) return false;
+  const tmp = `${file}.tmp`;
+  const r = spawnSync("cwebp", ["-quiet", "-q", String(OPTS.webpQuality), "-resize", String(OPTS.maxWidth), "0",
+                                "-metadata", "none", file, "-o", tmp], { stdio: "ignore" });
+  if (r.status === 0 && fs.existsSync(tmp) && fs.statSync(tmp).size > 0) {
+    fs.renameSync(tmp, file);
+    return true;
+  }
+  try { fs.unlinkSync(tmp); } catch {}
+  console.warn(`  · ${path.relative(ROOT, file)} 축소 실패 — 원본 크기로 둡니다.`);
+  return false;
+}
+
 /* ── API 호출 ─────────────────────────────────────────────── */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -133,6 +165,8 @@ function body(key) {
     output_format: OPTS.format,
     moderation: "low",
   };
+  /* webp/jpeg 는 API 단에서도 손실 압축을 걸 수 있다 (기본은 사실상 무손실이라 2MB+) */
+  if (OPTS.format !== "png") b.output_compression = 85;
   for (const k of dropped) delete b[k];
   return b;
 }
@@ -161,6 +195,7 @@ async function generate(key) {
       const file = outPath(key);
       fs.mkdirSync(path.dirname(file), { recursive: true });
       fs.writeFileSync(file, Buffer.from(b64, "base64"));
+      shrink(file);
       return file;
     }
 
@@ -203,7 +238,8 @@ async function generate(key) {
 }
 
 /* ── 실행 ─────────────────────────────────────────────────── */
-console.log(`모델 ${model} / ${OPTS.size} / quality=${OPTS.quality} / ${OPTS.format} / 동시 ${OPTS.concurrency}`);
+console.log(`모델 ${model} / ${OPTS.size} / quality=${OPTS.quality} / ${OPTS.format} / 동시 ${OPTS.concurrency}`
+  + (WILL_SHRINK ? ` / cwebp ${OPTS.maxWidth}px q${OPTS.webpQuality}` : ""));
 console.log(`생성 대상 ${targets.length}개${OPTS.force ? " (--force)" : " (기존 파일은 건너뜀)"}\n`);
 if (!targets.length) { console.log("만들 것이 없습니다. 끝."); process.exit(0); }
 
@@ -218,7 +254,8 @@ async function worker() {
     try {
       const file = await generate(key);
       done++;
-      console.log(`✔ [${String(done).padStart(3)}/${targets.length}] ${key.padEnd(2)} ${label} → ${path.relative(ROOT, file)}`);
+      const kb = Math.round(fs.statSync(file).size / 1024);
+      console.log(`✔ [${String(done).padStart(3)}/${targets.length}] ${key.padEnd(2)} ${label} → ${path.relative(ROOT, file)} (${kb} KB)`);
     } catch (err) {
       failed.push({ key, label, reason: String(err.message || err) });
       console.error(`✘ ${key} ${label} — ${err.message || err}`);

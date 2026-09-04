@@ -51,6 +51,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install cwebp (카드를 폰 크기로 줄이는 데 씀)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq webp
+
       - name: Generate peg cards
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
