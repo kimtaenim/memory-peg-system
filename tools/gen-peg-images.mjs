@@ -15,7 +15,7 @@
  *   --force            이미 있는 파일도 다시 생성
  *   --model <이름>     기본 gpt-image-2 (없는 모델이면 gpt-image-1 로 자동 대체)
  *   --size <WxH>       기본 1024x1536 (타로카드 세로 2:3)
- *   --quality <등급>   low | medium | high   (기본 medium)
+ *   --quality <등급>   low | medium | high   (기본 low — 작게 보는 카드라 충분하고 가장 싸다)
  *   --format <형식>    webp | png            (기본 webp)
  *   --concurrency <n>  동시 요청 수          (기본 3)
  *   --max-width <px>   저장 전에 cwebp 로 이 너비로 축소 (기본 768, 0이면 원본 유지)
@@ -53,7 +53,7 @@ const OPTS = {
   force: flag("force"),
   model: opt("model", process.env.PEG_IMAGE_MODEL || "gpt-image-2"),
   size: opt("size", "1024x1536"),
-  quality: opt("quality", "medium"),
+  quality: opt("quality", "low"),
   format: opt("format", "webp"),
   concurrency: Math.max(1, Number(opt("concurrency", "3")) || 3),
   maxWidth: Math.max(0, Number(opt("max-width", "768")) || 0),
@@ -89,8 +89,9 @@ const ITEMS = PROMPTS.items || {};
 const outPath = (key) => path.join(IMG_DIR, String(key.length), `${key}.${OPTS.format}`);
 const buildPrompt = (key) => {
   const item = ITEMS[key];
+  const number = STYLE.number ? STYLE.number.replaceAll("{n}", key) : "";   // 카드에 찍히는 숫자
   const tail = item.digits ? STYLE.withDigits : STYLE.noText;
-  return [item.prompt, STYLE.base, tail].filter(Boolean).join(". ").replace(/\.\.+/g, ".");
+  return [item.prompt, STYLE.base, number, tail].filter(Boolean).join(". ").replace(/\.\.+/g, ".");
 };
 
 let targets = Object.keys(PEGS)

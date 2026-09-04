@@ -18,7 +18,7 @@ on:
       quality:
         description: '화질 low / medium / high'
         required: false
-        default: 'medium'
+        default: 'low'
       size:
         description: '크기 (세로 타로카드는 1024x1536)'
         required: false

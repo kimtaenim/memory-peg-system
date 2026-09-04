@@ -1,8 +1,9 @@
 {
   "style": {
     "base": "A symbolist tarot card illustration in the manner of a hand-painted early twentieth century esoteric arcana deck: flat storybook painting with heavy ink outlines, art-nouveau woodcut feeling, and a slim ornate border frame around the scene. Limited palette of dull gold, oxblood red, midnight blue, sage green and bone white on aged parchment. Strange, dreamlike and faintly mischievous — floating symbols, an oversized moon or sun, drifting stars, a checkered floor, twin pillars or heavy drapery. One dominant figure or object centered and filling the card, bold silhouette, strong contrast, composed so it still reads clearly when shrunk to a thumbnail.",
-    "noText": "No text, no lettering, no roman numerals, no writing on any banner or plaque — leave every banner blank. No watermark, no signature.",
-    "withDigits": "The only lettering anywhere is the few digits described above, engraved plainly. No other text, no title banner writing, no watermark, no signature."
+    "noText": "Apart from that number there is no other text, no lettering, no roman numerals, no watermark, no signature.",
+    "withDigits": "Apart from that number and the few digits described in the scene there is no other text, no lettering, no watermark, no signature.",
+    "number": "The card's own number {n} is painted large, bold and centered in the banner at the bottom of the card, in the same aged-ink lettering as the rest of the card."
   },
   "items": {
     "0": {
@@ -135,7 +136,7 @@
       "prompt": "A fan of felt-tip pens rising like a bouquet, one uncapped and drawing a glowing ribbon of color through the air"
     },
     "42": {
-      "prompt": "A plump reveler in a black tuxedo and dark spectacles dancing an invisible-horse gallop between two pillars, golden ropes looping around his crossed wrists, a horse-headed moon watching from above"
+      "prompt": "A short plump Korean man with a round face, slicked-back black hair, small black sunglasses and a black bow tie, wearing a sky-blue tuxedo jacket with black lapels over a white shirt, caught mid-bounce in a horse-riding dance — knees bent, wrists crossed in front as if holding reins — between two pillars, golden lassos looping around him, a horse-headed moon watching from above"
     },
     "43": {
       "prompt": "A great antlered stag standing in a clearing, its antlers branching upward into bare trees, moonlight caught between them"
@@ -259,7 +260,7 @@
       "prompt": "An enormous fly with iridescent wings rubbing its front legs together on the rim of a cup, an iron tower far off in the haze behind"
     },
     "83": {
-      "prompt": "A pair of bright red briefs pegged to a line and snapping in the wind like a banner, a caped hero behind pulling an identical red pair on over his tights, the moon blushing above"
+      "prompt": "A skimpy bright red thong — a tiny triangle of cloth on thin string straps — pegged to a clothesline and snapping in the wind like a banner, a blushing plump moustached man in a bathrobe stretching up on tiptoe to grab it, the moon peeking out between its fingers in mock shock"
     },
     "84": {
       "prompt": "A rocket tearing off its launch pad in a pillar of flame, the service tower falling away, stars streaking overhead"

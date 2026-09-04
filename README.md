@@ -51,7 +51,7 @@ node tools/gen-peg-images.mjs [옵션]
   --force            이미 있는 파일도 다시 생성
   --model <이름>     기본 gpt-image-2 (없는 모델이면 gpt-image-1 로 자동 대체)
   --size <WxH>       기본 1024x1536 (세로 타로카드 2:3)
-  --quality <등급>   low | medium | high  (기본 medium)
+  --quality <등급>   low | medium | high  (기본 low)
   --format <형식>    webp | png  (기본 webp)
   --concurrency <n>  동시 요청 수 (기본 3)
   --max-width <px>   저장 전에 cwebp 로 축소 (기본 768, 0이면 원본 유지)
@@ -68,7 +68,8 @@ Actions 러너에는 자동으로 깔리고, 로컬은 `brew install webp` / `su
 - 이미 만들어진 파일은 **건너뛴다.** 중간에 끊겨도 그냥 다시 실행하면 이어서 만든다.
 - 429/5xx 는 지수 백오프로 재시도하고, 계정이 지원하지 않는 파라미터는 빼고 다시 던진다.
 - 마음에 안 드는 카드 한 장만 다시: `--only 42 --force`
-- 먼저 `--dry-run` 으로 프롬프트를 훑고, `--quality low` 로 몇 장 시험해 본 뒤 전체를 돌리는 편이 싸다.
+- 먼저 `--dry-run` 으로 프롬프트를 훑고 `--only` 로 몇 장 시험해 본 뒤 전체를 돌리는 편이 싸다.
+- 실존 인물(싸이·김영삼·장동건 …)은 이름을 넣으면 API 가 거부한다. 프롬프트는 이름 없이 생김새·의상·자세로 쓴다.
 
 안전 필터에 걸린 항목은 `SAFETY:` 로 표시된다. `docs/data/prompts.json` 의 해당 `prompt` 를
 조금 순화한 뒤 `--only <키> --force` 로 다시 구우면 된다.
@@ -98,8 +99,9 @@ tools/gen-peg-images.mjs  일괄 생성기 — 위 두 JSON 만 읽는다 (Node 
 {
   "style": {
     "base":       "A symbolist tarot card illustration ...",  // 110장 공통 화풍
-    "noText":     "No text, no lettering, ...",               // 글자 금지
-    "withDigits": "The only lettering anywhere is ..."        // 숫자만 허용
+    "number":     "The card's own number {n} is painted large ...",  // {n} 자리에 키가 들어간다
+    "noText":     "Apart from that number there is no other text ...",
+    "withDigits": "... and the few digits described in the scene ..." // digits: true 항목용
   },
   "items": {
     "42": { "prompt": "A plump reveler in a black tuxedo ..." },
@@ -108,7 +110,8 @@ tools/gen-peg-images.mjs  일괄 생성기 — 위 두 JSON 만 읽는다 (Node 
 }
 ```
 
-최종 프롬프트 = `items[키].prompt` + `style.base` + (`digits` 면 `withDigits`, 아니면 `noText`).
+최종 프롬프트 = `items[키].prompt` + `style.base` + `style.number`(`{n}`→키) + (`digits` 면 `withDigits`, 아니면 `noText`).
+카드 아래 배너에 그 카드의 숫자가 크게 찍힌다.
 두 JSON 의 키가 어긋나면 생성기가 실행할 때 경고로 알려준다.
 
 ## 고치기
