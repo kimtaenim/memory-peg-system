@@ -27,7 +27,7 @@
     --gold-ink: #201703;
     --parchment: #f3e8d0;
     --gap: clamp(6px, 1.6vw, 12px);
-    --pad-h: clamp(240px, 46vh, 430px);
+    --pad-h: clamp(220px, 40vh, 380px);
     --col: 540px;              /* 큰 화면에서 가운데로 모으는 폭 */
   }
   html, body { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
@@ -75,7 +75,7 @@
     overflow: hidden; animation: pop .18s ease-out;
   }
   @keyframes pop { from { transform: scale(.94); opacity: 0 } to { transform: none; opacity: 1 } }
-  #stage[data-n="1"] .card { flex: 0 0 auto; width: 48%; }
+  #stage[data-n="1"] .card { flex: 0 0 auto; width: 62%; }
 
   .card .pic {
     flex: 1 1 auto; min-height: 0;
@@ -139,7 +139,7 @@
   #display {
     flex: 0 0 auto;
     display: flex; align-items: center; justify-content: center; gap: .35em;
-    height: clamp(44px, 8.5vh, 62px); margin-top: var(--gap);
+    height: clamp(40px, 7vh, 56px); margin-top: var(--gap);
     background: var(--panel); border: 1px solid var(--edge); border-radius: 12px;
     font-size: clamp(24px, 8vw, 38px); font-weight: 900; letter-spacing: .04em;
     font-variant-numeric: tabular-nums;
@@ -169,6 +169,20 @@
   #pad button.enter:active { background: #cba54f; }
   #pad button:disabled { opacity: .35; }
 
+  /* 카드를 누르면 크게 보기 */
+  #zoom {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    background: #141130f2; padding: 12px;
+    animation: fade .15s ease-out;
+  }
+  #zoom[hidden] { display: none; }
+  @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+  #zoom img { max-width: 100%; max-height: 84vh; border-radius: 10px; box-shadow: 0 10px 40px #000a; }
+  #zoom .zcap { font-size: clamp(16px, 5vw, 24px); font-weight: 800; letter-spacing: -.03em; }
+  #zoom .zcap b { color: var(--gold); margin-right: .35em; font-variant-numeric: tabular-nums; }
+  #zoom .zhint { font-size: 12px; color: var(--muted); }
+
   /* 가로 모드: 카드는 왼쪽, 키패드는 오른쪽 */
   @media (orientation: landscape) and (max-height: 560px) {
     body { flex-direction: row; }
@@ -192,6 +206,12 @@
 </div>
 
 <div id="pad"></div>
+
+<div id="zoom" hidden>
+  <img alt="">
+  <div class="zcap"></div>
+  <div class="zhint">아무 데나 누르면 닫힘</div>
+</div>
 
 <script>
 (async () => {
@@ -285,9 +305,21 @@
 
       card.append(pic, cap);
       if (hide) card.addEventListener("click", () => { revealed.add(idx); render(); });
+      else if (PEGS[key]) card.addEventListener("click", () => openZoom(key, label));
       stage.appendChild(card);
     });
   }
+
+  /* ── 크게 보기 ────────────────────────────────────── */
+  const zoom = document.getElementById("zoom");
+  function openZoom(key, label) {
+    const img = zoom.querySelector("img");
+    img.src = imgSrc(key);
+    img.alt = `${key} ${label}`;
+    zoom.querySelector(".zcap").innerHTML = `<b>${key}</b>${escapeHtml(label)}`;
+    zoom.hidden = false;
+  }
+  zoom.addEventListener("click", () => { zoom.hidden = true; });
 
   /* ── 입력 ─────────────────────────────────────────── */
   const tap = (ms) => { if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} } };
@@ -370,6 +402,7 @@
 
   /* 물리 키보드 (데스크톱) */
   addEventListener("keydown", (e) => {
+    if (!zoom.hidden) { if (e.key === "Escape" || e.key === "Enter") zoom.hidden = true; return; }
     if (e.key >= "0" && e.key <= "9") press(e.key);
     else if (e.key === "Backspace") { e.preventDefault(); press("back"); }
     else if (e.key === "Enter") press("enter");
