@@ -49,7 +49,8 @@ const opt = (name, dflt) => {
 };
 
 const OPTS = {
-  only: opt("only", "").split(",").map((s) => s.trim()).filter(Boolean),
+  /* "only 5, 42,83" 처럼 단어·공백·따옴표가 섞여 들어와도 숫자 토큰만 뽑는다 */
+  only: (opt("only", "").match(/\d+/g) || []),
   force: flag("force"),
   model: opt("model", process.env.PEG_IMAGE_MODEL || "gpt-image-2"),
   size: opt("size", "1024x1536"),
