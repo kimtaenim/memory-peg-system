@@ -1,0 +1,17 @@
+{
+  "name": "숫자 페그 — 0-99 타로 덱",
+  "short_name": "숫자 페그",
+  "description": "숫자를 누르면 타로카드로 떠오르는 0-99 페그 시스템",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#141130",
+  "theme_color": "#141130",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "favicon.svg",  "sizes": "any",     "type": "image/svg+xml" }
+  ]
+}
