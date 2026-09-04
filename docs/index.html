@@ -145,7 +145,19 @@
     font-variant-numeric: tabular-nums;
     width: calc(100% - var(--gap) * 2); max-width: calc(var(--col) - var(--gap) * 2);
   }
+  #display { position: relative; }
+  #digits { display: flex; align-items: center; gap: .35em; }
   #display .ph { color: #4d4488; font-size: .6em; letter-spacing: 0; }
+  /* 오른쪽 작은 새로고침(전체 지우기) 버튼 */
+  #reset {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    width: clamp(30px, 8vw, 38px); height: clamp(30px, 8vw, 38px); border-radius: 50%;
+    border: 1px solid var(--edge); background: var(--panel-2); color: var(--muted);
+    font-size: clamp(15px, 4.2vw, 20px); line-height: 1; cursor: pointer; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #reset:active { background: #352d68; }
+  #reset[disabled] { opacity: .3; }
   #display .grp:nth-child(even) { color: var(--gold); }
 
   /* ── 키패드 ───────────────────────────────────────── */
@@ -202,7 +214,7 @@
 
   <section id="stage" aria-live="polite"></section>
 
-  <div id="display"><span class="ph">숫자를 누르세요</span></div>
+  <div id="display"><span id="digits"><span class="ph">숫자를 누르세요</span></span><button id="reset" type="button" aria-label="처음부터" title="처음부터">↻</button></div>
 </div>
 
 <div id="pad"></div>
@@ -221,7 +233,8 @@
   const PEGS_URL = "data/pegs.json";    // 숫자 → 키워드. 목록은 전부 여기서 온다
   let PEGS = {};
   const stage = document.getElementById("stage");
-  const display = document.getElementById("display");
+  const display = document.getElementById("digits");
+  const resetBtn = document.getElementById("reset");
   const pad = document.getElementById("pad");
   const modeBtn = document.getElementById("mode");
 
@@ -356,7 +369,10 @@
     const full = digits.length >= MAX_DIGITS;
     pad.querySelectorAll("button[data-num]").forEach((b) => { b.disabled = full; });
     pad.querySelector('[data-key="back"]').disabled = !digits;
+    resetBtn.disabled = !digits;
   }
+
+  resetBtn.addEventListener("click", () => press("clear"));
 
   /* ── 키패드 ───────────────────────────────────────── */
   const layout = [["1","2","3"], ["4","5","6"], ["7","8","9"], ["back","0","enter"]];
