@@ -267,13 +267,13 @@
       "solemn": true
     },
     "80": {
-      "prompt": "A golden bread bun split open with green spring onions bursting out of it, steam rising in curls, wheat sheaves standing behind"
+      "prompt": "A giant golden-brown Korean red bean bun, round and glossy with a few black sesame seeds on top, torn open to show the thick dark sweet red bean paste inside, steam rising, presented on a cloth by a languid figure who has taken one bite"
     },
     "81": {
       "prompt": "A leaning tower of ring binders and folders with papers spilling out like feathers, a small clerk climbing it on a ladder"
     },
     "82": {
-      "prompt": "An enormous fly with iridescent wings rubbing its front legs together on the rim of a cup, an iron tower far off in the haze behind"
+      "prompt": "An enormous housefly with iridescent wings and huge red compound eyes wearing a black beret and a striped Breton shirt, perched on a Paris café table beside a baguette and a glass of red wine, rubbing its front legs together, the Eiffel Tower rising large and unmistakable directly behind it"
     },
     "83": {
       "prompt": "A skimpy bright red thong — a tiny triangle of cloth on thin string straps — pegged to a clothesline and snapping in the wind like a banner, a blushing plump moustached man in a bathrobe stretching up on tiptoe to grab it, a sun peeking out between its fingers in mock shock"
@@ -282,7 +282,8 @@
       "prompt": "A rocket tearing off its launch pad in a pillar of flame, the service tower falling away, stars streaking overhead"
     },
     "85": {
-      "prompt": "A pharaoh in striped nemes headdress and false beard holding crook and flail, seated between two pyramids, a scarab above his brow"
+      "prompt": "The Pharaoh of the Exodus on his throne, in striped nemes headdress and false beard, gripping crook and flail, jaw set in stubborn refusal, a wooden staff turned into a serpent rearing at his feet, frogs hopping over the steps and a dark cloud of locusts gathering above, pyramids behind",
+      "solemn": true
     },
     "86": {
       "prompt": "A bowl of glistening red raw beef strips crowned with a golden egg yolk, pear slivers and sesame seeds, chopsticks laid across the rim like a bridge"
