@@ -1,9 +1,11 @@
 {
   "style": {
-    "base": "A symbolist tarot card illustration in the manner of a hand-painted early twentieth century esoteric arcana deck: flat storybook painting with heavy ink outlines, art-nouveau woodcut feeling, and a slim ornate border frame around the scene. Limited palette of dull gold, oxblood red, midnight blue, sage green and bone white on aged parchment. The subject fills most of the card — large, close and theatrical. People are painted in the sensual, uncanny manner of symbolist painters like Klimt, Moreau and Khnopff: languid poses, heavy-lidded sidelong gazes, bare shoulders and clinging drapery, faintly erotic but never explicit. When the peg is an object, it stays the clear focus — enormous, or held and presented by such a figure. The background is sparse and quiet, in the spirit of Piranesi's etchings: the ruins of a vast vaulted hall, broken columns, an empty arch, a fallen capital, one lonely staircase, drawn in fine hatched lines and fading into shadow, with at most one small impossible detail — a stair that quietly returns into itself, or an arch that could not stand. Plenty of empty space; the background never competes with the subject. No moon anywhere. Strange, dreamlike and faintly mischievous; bold silhouette, strong contrast, composed so it still reads clearly when shrunk to a thumbnail.",
+    "base": "A symbolist tarot card illustration in the manner of a hand-painted early twentieth century esoteric arcana deck: flat storybook painting with heavy ink outlines, art-nouveau woodcut feeling, and a slim ornate border frame around the scene. Limited palette of dull gold, oxblood red, midnight blue, sage green and bone white on aged parchment. The subject fills most of the card — large, close and theatrical. The background is sparse and quiet, in the spirit of Piranesi's etchings: the ruins of a vast vaulted hall, broken columns, an empty arch, a fallen capital, one lonely staircase, drawn in fine hatched lines and fading into shadow, with at most one small impossible detail — a stair that quietly returns into itself, or an arch that could not stand. Plenty of empty space; the background never competes with the subject. No moon anywhere. Strange, dreamlike and faintly mischievous; bold silhouette, strong contrast, composed so it still reads clearly when shrunk to a thumbnail.",
     "noText": "Apart from that number there is no other text, no lettering, no roman numerals, no watermark, no signature.",
     "withDigits": "Apart from that number and the few digits described in the scene there is no other text, no lettering, no watermark, no signature.",
-    "number": "The card's own number {n} is painted large, bold and centered in the banner at the bottom of the card, in the same aged-ink lettering as the rest of the card."
+    "number": "The card's own number {n} is painted large, bold and centered in the banner at the bottom of the card, in the same aged-ink lettering as the rest of the card.",
+    "figure": "People are painted in the sensual, uncanny manner of symbolist painters like Klimt, Moreau and Khnopff: languid poses, heavy-lidded sidelong gazes, bare shoulders and clinging drapery, faintly erotic but never explicit. When the peg is an object, it stays the clear focus — enormous, or held and presented by such a figure.",
+    "figureSolemn": "People are painted with dignity and restraint, in the grave manner of a history painting: fully clothed, composed, no sensuality whatsoever, no bare skin beyond face and hands. When the peg is an object, it stays the clear focus — enormous, or held by such a figure."
   },
   "items": {
     "0": {
@@ -50,7 +52,8 @@
       "digits": true
     },
     "14": {
-      "prompt": "A rough wooden cross on a bare hill, a single white lily growing at its foot, storm clouds parting above it"
+      "prompt": "A rough wooden cross on a bare hill, a single white lily growing at its foot, storm clouds parting above it",
+      "solemn": true
     },
     "15": {
       "prompt": "An enormous full moon filling the sky with a white rabbit pounding rice cake in a mortar upon its face, two towers below, a dog and a wolf howling"
@@ -59,7 +62,8 @@
       "prompt": "A grinning innkeeper in a desert tavern lifting the lid from a bamboo steamer, the rising steam curling into small human shapes, a cleaver resting on the block, eerie but bloodless"
     },
     "17": {
-      "prompt": "A smirking student in uniform leaning against a locker with arms crossed, a crown of smoke above his head, smaller figures cowering in his shadow"
+      "prompt": "A smirking student in uniform leaning against a locker with arms crossed, a crown of smoke above his head, smaller figures cowering in his shadow",
+      "solemn": true
     },
     "18": {
       "prompt": "A crimson-faced figure roaring with steam bursting from both ears, a speech scroll filled with jagged censor glyphs @#$%!, lightning splitting the sky behind",
@@ -76,7 +80,8 @@
       "prompt": "A caped surgeon with a long stitched scar and two-toned black and white hair raising a scalpel like a wand, surgical lamps burning above him like suns"
     },
     "22": {
-      "prompt": "Yi I (Yulgok), the Joseon Confucian scholar, in white robes seated beneath a plum tree with an open book on his knee, a crane standing at his side"
+      "prompt": "Yi I (Yulgok), the Joseon Confucian scholar, in white robes seated beneath a plum tree with an open book on his knee, a crane standing at his side",
+      "solemn": true
     },
     "23": {
       "prompt": "A shimmering gown on a headless dress form beneath a spotlight, jewels raining down, a mirror behind it reflecting an empty dress"
@@ -103,10 +108,12 @@
       "prompt": "A helicopter hovering high above a tiny world, its searchlight falling as a cone of gold onto the earth far below"
     },
     "31": {
-      "prompt": "The Korean taegukgi flag streaming from a staff planted on a mountain peak, red and blue swirl and four black trigrams, ranges receding below"
+      "prompt": "The Korean taegukgi flag, enormous, streaming from a tall staff — red and blue taeguk swirl and four black trigrams filling the card — planted on a mountain summit by a soldier in full dress uniform saluting beneath it",
+      "solemn": true
     },
     "32": {
-      "prompt": "A small shaven-headed novice monk in grey robes hiding a stolen rice cake behind his back, a lotus at his feet and the stern shadow of his master on the wall"
+      "prompt": "A small boy novice monk, about eight years old, with a shaved head and a loose grey robe fully covering him, hiding a stolen rice cake behind his back with a guilty grin, a lotus at his feet and the stern shadow of his master falling across the wall",
+      "solemn": true
     },
     "33": {
       "prompt": "A wild ginseng root shaped like a little human body glowing on mountain moss, whiskered roots spread out like a halo, a tiger's eyes burning in the dark behind it"
@@ -124,10 +131,12 @@
       "prompt": "A great silver-blue tuna leaping from the sea with its body arced, a fishing line snapping in two"
     },
     "38": {
-      "prompt": "A barbed wire line drawn straight across a grey field at dusk, two helmeted soldiers facing one another, a single bird perched on the wire between them"
+      "prompt": "A barbed wire fence line drawn straight across a grey field at dusk, two soldiers in full uniform and helmets standing rigidly on either side facing one another, rifles shouldered, a single small bird perched on the wire between them",
+      "solemn": true
     },
     "39": {
-      "prompt": "Three sworn brothers kneeling in a peach blossom garden with their hands joined over a burning brazier, petals falling around them"
+      "prompt": "Three sworn brothers kneeling in a peach blossom garden with their hands joined over a burning brazier, petals falling around them",
+      "solemn": true
     },
     "40": {
       "prompt": "A straw-hatted ferryman poling a narrow boat across still misty water, a lantern at the prow, a shrouded passenger seated behind him"
@@ -142,13 +151,15 @@
       "prompt": "A great antlered stag standing in a clearing, its antlers branching upward into bare trees, a lantern light caught between them"
     },
     "44": {
-      "prompt": "A pale reaper in a black gat hat and black durumagi robe holding an unrolled summons scroll, blue mist at his feet, an empty road stretching behind him"
+      "prompt": "A pale reaper in a black gat hat and black durumagi robe holding an unrolled summons scroll, blue mist at his feet, an empty road stretching behind him",
+      "solemn": true
     },
     "45": {
       "prompt": "A blue-faced monk warrior with enormous ears holding a crescent-moon spade staff, a necklace of pale beads, cupping one ear and hearing nothing at all"
     },
     "46": {
-      "prompt": "Six robed officials standing shoulder to shoulder in an unbroken row with resolute faces, six candles burning before them, one empty throne behind"
+      "prompt": "Six robed officials standing shoulder to shoulder in an unbroken row with resolute faces, six candles burning before them, one empty throne behind",
+      "solemn": true
     },
     "47": {
       "prompt": "An enormous syringe held upright like a sword, one drop trembling at the needle's point, a bandaged arm below it"
@@ -172,7 +183,8 @@
       "prompt": "A jade royal seal with a carved dragon knob resting on a red ink pad, a decree half stamped beneath it, two hands hovering above"
     },
     "54": {
-      "prompt": "An enormous gentle grey super-pig with drooping ears lying down, a small girl asleep against its flank, mountains behind them"
+      "prompt": "An enormous gentle grey super-pig with drooping ears lying down, a small girl asleep against its flank, mountains behind them",
+      "solemn": true
     },
     "55": {
       "prompt": "A tiny cheerful granny in apron and headscarf sitting inside a great porcelain teapot and waving, a spoon leaning against it like a ladder"
@@ -184,7 +196,8 @@
       "prompt": "A hand lacquering a black bowl with a fine brush, layer upon layer of glossy red and black, a lacquer tree bleeding sap behind"
     },
     "58": {
-      "prompt": "A leather-jacketed older brother carrying his little sister on his back, both laughing, a motorbike and a setting sun behind them"
+      "prompt": "A leather-jacketed older brother carrying his little sister on his back, both laughing, a motorbike and a setting sun behind them",
+      "solemn": true
     },
     "59": {
       "prompt": "A black silkie chicken with dark fluffed feathers standing on a stone, one white egg beneath it"
@@ -193,7 +206,8 @@
       "prompt": "A petrol station attendant in a peaked cap holding a fuel nozzle like a sceptre, an old pump beside him, a road running to the horizon"
     },
     "61": {
-      "prompt": "Yu Kil-chun, the Joseon scholar, in traditional robes carrying a western leather suitcase and umbrella, a steamship and foreign spires behind him, his shadow still wearing a scholar's hat"
+      "prompt": "Yu Kil-chun, the Joseon scholar, in traditional robes carrying a western leather suitcase and umbrella, a steamship and foreign spires behind him, his shadow still wearing a scholar's hat",
+      "solemn": true
     },
     "62": {
       "prompt": "King Louis XVI of France, plump in a towering powdered wig and gold coat, posing haughtily, a great cake beside him and the shadow of a blade behind"
@@ -205,7 +219,8 @@
       "prompt": "Bright yellow bumpy yuzu fruits on a leafy branch, one sliced open, its scent drawn as spiraling golden lines"
     },
     "65": {
-      "prompt": "Josip Broz Tito, the Yugoslav marshal, in a white uniform heavy with medals standing with folded arms, ribbons behind him and a map torn into pieces at his feet"
+      "prompt": "Josip Broz Tito, the Yugoslav marshal, in a white uniform heavy with medals standing with folded arms, ribbons behind him and a map torn into pieces at his feet",
+      "solemn": true
     },
     "66": {
       "prompt": "A skyline of towers with a crowned torch-bearing colossus rising among them, a yellow cab below, steam curling up from the street"
@@ -248,7 +263,8 @@
       "prompt": "A red silk qipao with gold embroidery on a dress form, a folding fan open beside it, lanterns hanging above"
     },
     "79": {
-      "prompt": "Two uniformed schoolboys walking shoulder to shoulder down an alley at dusk, their two shadows joined into one"
+      "prompt": "Two uniformed schoolboys walking shoulder to shoulder down an alley at dusk, their two shadows joined into one",
+      "solemn": true
     },
     "80": {
       "prompt": "A golden bread bun split open with green spring onions bursting out of it, steam rising in curls, wheat sheaves standing behind"
@@ -290,7 +306,8 @@
       "prompt": "A green frog caught mid-leap over a lily pad with its legs stretched wide, a small crown sinking into the water below"
     },
     "93": {
-      "prompt": "An exhausted student with a headband slumped behind a mountain of workbooks, a clock reading two in the morning, a distant gate of light"
+      "prompt": "An exhausted student with a headband slumped behind a mountain of workbooks, a clock reading two in the morning, a distant gate of light",
+      "solemn": true
     },
     "94": {
       "prompt": "A boiled pig's head smiling on a ritual table with folded banknotes tucked into its mouth, rice cakes and a candle before it, bowing shadows behind"
@@ -317,10 +334,12 @@
       "prompt": "A worn teddy bear seated on a throne cushion, one glass eye missing and its stitches showing, holding a tiny key in its paw"
     },
     "02": {
-      "prompt": "A Joseon chief state councillor in crimson robes and black horsehair hat seated between two pillars, holding a wooden court tablet like a scroll of law"
+      "prompt": "A Joseon chief state councillor in crimson robes and black horsehair hat seated between two pillars, holding a wooden court tablet like a scroll of law",
+      "solemn": true
     },
     "03": {
-      "prompt": "Kim Young-sam, former president of South Korea, as an elderly statesman in a white jogging suit and headband running in place, a ballot box beside him and a rising sun behind"
+      "prompt": "Kim Young-sam, former president of South Korea, as an elderly statesman in a white jogging suit and headband running in place, a ballot box beside him and a rising sun behind",
+      "solemn": true
     },
     "04": {
       "prompt": "A peacock fanning a tail of a hundred feather-eyes, every eye open and watching the viewer"
@@ -339,7 +358,8 @@
       "prompt": "A giant bear's paw pressing down from the top of the card, pink pads and blunt claws, tiny travelers fleeing beneath it"
     },
     "09": {
-      "prompt": "A holy fool with a bowl haircut and buck teeth grinning in oversized clothes, one shoe missing, a small dog tugging at his trouser leg"
+      "prompt": "A holy fool with a bowl haircut and buck teeth grinning in oversized clothes, one shoe missing, a small dog tugging at his trouser leg",
+      "solemn": true
     }
   }
 }

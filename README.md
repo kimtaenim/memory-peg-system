@@ -100,18 +100,21 @@ tools/gen-peg-images.mjs  일괄 생성기 — 위 두 JSON 만 읽는다 (Node 
 {
   "style": {
     "base":       "A symbolist tarot card illustration ...",  // 110장 공통 화풍
+    "figure":       "People are painted in the sensual ... manner",   // 기본 인물 톤 (야릇)
+    "figureSolemn": "People are painted with dignity and restraint",  // solemn: true 항목용
     "number":     "The card's own number {n} is painted large ...",  // {n} 자리에 키가 들어간다
     "noText":     "Apart from that number there is no other text ...",
     "withDigits": "... and the few digits described in the scene ..." // digits: true 항목용
   },
   "items": {
     "42": { "prompt": "A plump reveler in a black tuxedo ..." },
-    "07": { "prompt": "A tuxedoed spy ...", "digits": true }   // digits: 숫자 표기 허용
+    "07": { "prompt": "A tuxedoed spy ...", "digits": true },  // digits: 숫자 표기 허용
+    "32": { "prompt": "A small boy novice monk ...", "solemn": true } // solemn: 야릇한 톤 끄기 (아이·국기·엄숙한 주제)
   }
 }
 ```
 
-최종 프롬프트 = `items[키].prompt` + `style.base` + `style.number`(`{n}`→키) + (`digits` 면 `withDigits`, 아니면 `noText`).
+최종 프롬프트 = `items[키].prompt` + `style.base` + (`solemn` 이면 `figureSolemn`, 아니면 `figure`) + `style.number`(`{n}`→키) + (`digits` 면 `withDigits`, 아니면 `noText`).
 카드 아래 배너에 그 카드의 숫자가 크게 찍힌다.
 두 JSON 의 키가 어긋나면 생성기가 실행할 때 경고로 알려준다.
 

@@ -89,9 +89,10 @@ const ITEMS = PROMPTS.items || {};
 const outPath = (key) => path.join(IMG_DIR, String(key.length), `${key}.${OPTS.format}`);
 const buildPrompt = (key) => {
   const item = ITEMS[key];
+  const figure = item.solemn ? STYLE.figureSolemn : STYLE.figure;           // 인물 톤: 야릇 / 엄숙
   const number = STYLE.number ? STYLE.number.replaceAll("{n}", key) : "";   // 카드에 찍히는 숫자
   const tail = item.digits ? STYLE.withDigits : STYLE.noText;
-  return [item.prompt, STYLE.base, number, tail].filter(Boolean).join(". ").replace(/\.\.+/g, ".");
+  return [item.prompt, STYLE.base, figure, number, tail].filter(Boolean).join(". ").replace(/\.\.+/g, ".");
 };
 
 let targets = Object.keys(PEGS)
