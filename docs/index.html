@@ -153,7 +153,7 @@
     position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
     width: clamp(34px, 9vw, 44px); height: clamp(34px, 9vw, 44px); border-radius: 50%;
     border: 2px solid var(--gold); background: #2b2555; color: var(--gold);
-    font-size: clamp(21px, 6vw, 28px); font-weight: 900; line-height: 1; cursor: pointer; padding: 0 0 3px;
+    line-height: 1; cursor: pointer; padding: 0;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 0 0 3px #e2bb6022;
   }
@@ -215,7 +215,7 @@
 
   <section id="stage" aria-live="polite"></section>
 
-  <div id="display"><span id="digits"><span class="ph">숫자를 누르세요</span></span><button id="reset" type="button" aria-label="처음부터" title="처음부터">↻</button></div>
+  <div id="display"><span id="digits"><span class="ph">숫자를 누르세요</span></span><button id="reset" type="button" aria-label="처음부터" title="처음부터"><svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8"/><path d="M20 4v5h-5"/></svg></button></div>
 </div>
 
 <div id="pad"></div>
