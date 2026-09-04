@@ -150,14 +150,15 @@
   #display .ph { color: #4d4488; font-size: .6em; letter-spacing: 0; }
   /* 오른쪽 작은 새로고침(전체 지우기) 버튼 */
   #reset {
-    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    width: clamp(30px, 8vw, 38px); height: clamp(30px, 8vw, 38px); border-radius: 50%;
-    border: 1px solid var(--edge); background: var(--panel-2); color: var(--ink);
-    font-size: clamp(19px, 5.4vw, 25px); font-weight: 700; line-height: 1; cursor: pointer; padding: 0 0 2px;
+    position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+    width: clamp(34px, 9vw, 44px); height: clamp(34px, 9vw, 44px); border-radius: 50%;
+    border: 2px solid var(--gold); background: #2b2555; color: var(--gold);
+    font-size: clamp(21px, 6vw, 28px); font-weight: 900; line-height: 1; cursor: pointer; padding: 0 0 3px;
     display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 3px #e2bb6022;
   }
-  #reset:active { background: #352d68; }
-  #reset[disabled] { opacity: .3; }
+  #reset:active { background: var(--gold); color: var(--gold-ink); }
+  #reset[disabled] { opacity: .25; box-shadow: none; }
   #display .grp:nth-child(even) { color: var(--gold); }
 
   /* ── 키패드 ───────────────────────────────────────── */
