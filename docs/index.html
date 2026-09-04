@@ -195,6 +195,7 @@
   #zoom .zcap { font-size: clamp(16px, 5vw, 24px); font-weight: 800; letter-spacing: -.03em; }
   #zoom .zcap b { color: var(--gold); margin-right: .35em; font-variant-numeric: tabular-nums; }
   #zoom .zhint { font-size: 12px; color: var(--muted); }
+  #zoom .how { font-size: .6em; font-weight: 700; color: var(--muted); border: 1px solid var(--edge); border-radius: 999px; padding: 2px 8px; margin-left: .4em; vertical-align: middle; }
 
   /* 가로 모드: 카드는 왼쪽, 키패드는 오른쪽 */
   @media (orientation: landscape) and (max-height: 560px) {
@@ -209,7 +210,7 @@
 
 <div class="lhs">
   <header>
-    <div class="brand"><b>숫자 페그</b> · 0–99</div>
+    <div class="brand"><b>숫자 페그</b> · 모양(0–9) · 소리(00–99)</div>
     <button id="mode" type="button" aria-pressed="false">즉시</button>
   </header>
 
@@ -279,7 +280,8 @@
       stage.innerHTML =
         '<div id="hint">' +
           '<div class="big">숫자를 누르면 그림이 뜹니다</div>' +
-          '<div class="sub"><b>8396</b> → 빨간 삼각팬티 + 구루<br>' +
+          '<div class="sub">한 자리는 숫자의 <b>모양</b>, 두 자리는 숫자의 <b>소리</b>로 페그를 정했습니다<br><br>' +
+          '<b>8396</b> → 빨간 삼각팬티 + 구루<br>' +
           '<b>542</b> → 갈고리 + 싸이<br>' +
           '홀수 자리는 맨 앞 한 자리부터 끊습니다</div>' +
         '</div>';
@@ -330,7 +332,8 @@
     const img = zoom.querySelector("img");
     img.src = imgSrc(key);
     img.alt = `${key} ${label}`;
-    zoom.querySelector(".zcap").innerHTML = `<b>${key}</b>${escapeHtml(label)}`;
+    const how = key.length === 1 ? "모양" : "소리";
+    zoom.querySelector(".zcap").innerHTML = `<b>${key}</b>${escapeHtml(label)} <span class="how">${how}</span>`;
     zoom.hidden = false;
   }
   zoom.addEventListener("click", () => { zoom.hidden = true; });
