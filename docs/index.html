@@ -53,6 +53,7 @@
   }
   .brand { font-size: clamp(12px, 3.2vw, 15px); font-weight: 700; letter-spacing: -.02em; color: var(--muted); }
   .brand b { color: var(--ink); }
+  body.ingame .brand .sub { display: none; }
   #mode {
     appearance: none; border: 1px solid var(--edge); background: var(--panel);
     color: var(--ink); border-radius: 999px; padding: 6px 14px;
@@ -219,6 +220,30 @@
   #pad button.enter:active { background: #cba54f; }
   #pad button:disabled { opacity: .35; }
 
+  /* ── 사물 게임 ────────────────────────────────────── */
+  .oseq { flex: 0 1 auto; display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 6px 4px; padding: 6px 0; }
+  .ocell { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 6px; border-radius: 12px; border: 2px solid transparent; }
+  .ocell.cur { border-color: var(--gold); background: #2b2555; }
+  .ocell.ok { background: #1f3a2c; } .ocell.ng { background: #3d2230; }
+  .oseq .oe { line-height: 1; }
+  .oseq.xl .oe { font-size: clamp(56px, 19vw, 96px); }
+  .oseq.lg .oe { font-size: clamp(40px, 13vw, 64px); }
+  .oseq.md .oe { font-size: clamp(30px, 9vw, 48px); }
+  .oseq.sm .oe { font-size: clamp(24px, 7vw, 36px); }
+  .oseq .oq { color: #5a52a0; font-weight: 900; }
+  .oseq .on { font-size: clamp(11px, 3.2vw, 14px); font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .oseq .on b.ok { color: #6fd39a; } .oseq .on b.ng { color: #ff7a7a; }
+  .oseq .oa { font-size: .55em; line-height: 1; opacity: .85; }
+  #stage.obj { justify-content: center; }
+  #stage.obj .gmsg { flex: 0 0 auto; padding-top: 4px; }
+
+  /* 사물 패널: 5열 × 4행 이모지 + ⌫ ⏎ */
+  #pad.emoji { grid-template-columns: repeat(5, 1fr); height: clamp(300px, 50vh, 460px); gap: 5px; }
+  #pad.emoji button { font-size: clamp(26px, 8vw, 40px); border-radius: 12px; padding: 0; }
+  #pad.emoji button[data-emoji]:disabled { opacity: .35; }
+  #pad.emoji button[data-key="back"] { grid-column: span 2; font-size: clamp(20px, 6vw, 28px); }
+  #pad.emoji button[data-key="enter"] { grid-column: span 3; font-size: clamp(20px, 6vw, 28px); }
+
   /* 카드를 누르면 크게 보기 */
   #zoom {
     position: fixed; inset: 0; z-index: 10;
@@ -247,11 +272,12 @@
 
 <div class="lhs">
   <header>
-    <div class="brand"><b>숫자 페그</b> · 모양(0–9) · 소리(00–99)</div>
+    <div class="brand"><b>숫자 페그</b><span class="sub"> · 모양(0–9) · 소리(00–99)</span></div>
     <div class="hbtns">
       <button id="gameopt" type="button" aria-pressed="true" hidden>카드</button>
       <button id="mode" type="button" aria-pressed="false">즉시</button>
-      <button id="gamebtn" type="button" aria-pressed="false">게임</button>
+      <button id="gamebtn" type="button" aria-pressed="false">숫자</button>
+      <button id="objbtn" type="button" aria-pressed="false">사물</button>
     </div>
   </header>
 
@@ -286,7 +312,10 @@
   let digits = "";
   let quiz = localStorage.getItem("peg.quiz") === "1";
   const revealed = new Set();           // 퀴즈 모드에서 공개된 카드 index
-  let game = null;                      // 게임 상태 (null 이면 자유 모드)
+  let game = null;                      // 숫자 게임 상태 (null 이면 아님)
+  let obj = null;                       // 사물 게임 상태 (null 이면 아님)
+  let EMOJI = [];                       // 사물 이모지 풀 (data/emoji.json)
+  const objBtn = document.getElementById("objbtn");
 
   /* 8396 → ["83","96"],  542 → ["5","42"] : 홀수면 맨 앞만 한 자리 */
   function chunk(s) {
@@ -352,8 +381,9 @@
 
   /* ── 자유 모드 그리기 ──────────────────────────────── */
   function render() {
+    if (obj) return renderObj();
     if (game) return renderGame();
-    stage.classList.remove("game");
+    stage.classList.remove("game", "obj");
     const chunks = chunk(digits);
 
     display.innerHTML = chunks.length ? groupedHtml(digits) : '<span class="ph">숫자를 누르세요</span>';
@@ -405,6 +435,8 @@
 
   function endGame() {
     game = null;
+    obj = null;
+    buildPad();
     digits = "";
     syncHeader();
     syncPad();
@@ -437,7 +469,7 @@
         const ok = g.answers[i] === p;
         inner += `<span class="gn">${groupedHtml(p)}</span>` +
                  `<span class="ga ${ok ? "ok" : "ng"}">${escapeHtml(g.answers[i] || "—")}</span>` +
-                 `<span class="gmark ${ok ? "ok" : "ng"}">${ok ? "✓" : "✗"}</span>`;
+                 `<span class="gmark ${ok ? "ok" : "ng"}">${ok ? "○" : "✗"}</span>`;
       }
       row.innerHTML = inner;
       if (g.stage !== "answer") row.addEventListener("click", () => { g.sel = i; render(); });
@@ -499,6 +531,94 @@
     render();
   }
 
+  /* ── 사물 게임: 무작위 이모지 n개를 순서대로 외우기 ── */
+  const PANEL = 20;
+  const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  function newObj(level) {
+    level = Math.min(Math.max(3, level), PANEL);
+    const pool = shuffle(EMOJI).slice(0, PANEL);                // 이번 판 패널 20개 (정답 + 미끼)
+    obj = {
+      level, stage: "study",                                     // study → play → result
+      pool: shuffle(pool),                                       // 패널 배치
+      seq: shuffle(pool).slice(0, level),                        // 외울 순서
+      picks: [],
+    };
+    syncHeader(); buildPad(); syncPad(); render();
+  }
+  function endObj() { obj = null; syncHeader(); buildPad(); syncPad(); render(); }
+
+  const ord = (i) => String(i + 1).padStart(2, "0");
+  const sizeClass = (n) => n <= 4 ? "xl" : n <= 8 ? "lg" : n <= 12 ? "md" : "sm";
+
+  function renderObj() {
+    const o = obj;
+    stage.classList.add("game", "obj");
+    stage.classList.remove("free");
+    stage.innerHTML = "";
+    delete stage.dataset.n;
+
+    const row = document.createElement("div");
+    row.className = `oseq ${sizeClass(o.level)}`;
+    o.seq.forEach((e, i) => {
+      const cell = document.createElement("div");
+      cell.className = "ocell";
+      if (o.stage === "study") {
+        cell.innerHTML = `<div class="oe">${e}</div><div class="on">${ord(i)}</div>`;
+      } else if (o.stage === "play") {
+        const p = o.picks[i];
+        cell.className += i === o.picks.length ? " cur" : "";
+        cell.innerHTML = `<div class="oe">${p || '<span class="oq">?</span>'}</div><div class="on">${ord(i)}</div>`;
+      } else {
+        const p = o.picks[i];
+        const ok = p === e;
+        cell.className += ok ? " ok" : " ng";
+        cell.innerHTML = `<div class="oe">${p || '<span class="oq">·</span>'}</div>` +
+                         `<div class="on">${ord(i)} <b class="${ok ? "ok" : "ng"}">${ok ? "○" : "✗"}</b></div>` +
+                         (ok ? "" : `<div class="oa">${e}</div>`);
+      }
+      row.appendChild(cell);
+    });
+    stage.appendChild(row);
+
+    if (o.stage === "study") {
+      stage.insertAdjacentHTML("beforeend",
+        `<div class="gmsg"><b>사물 ${o.level}개를 순서대로 외우세요</b>01 곰인형, 02 영의정… 순번 페그에 엮어 보세요<br>다 외웠으면 ⏎</div>`);
+      display.innerHTML = `<span class="score-inline">${o.level}개</span><span class="ph">&nbsp; 외운 뒤 ⏎</span>`;
+    } else if (o.stage === "play") {
+      display.innerHTML = `<span class="score-inline">${o.picks.length} / ${o.level}</span><span class="ph">&nbsp; 순서대로 고르고 ⏎</span>`;
+    } else {
+      const score = o.seq.filter((e, i) => o.picks[i] === e).length;
+      const perfect = score === o.level;
+      display.innerHTML = `<span class="score-inline">${score} / ${o.level}</span>` +
+        `<span class="ph">&nbsp; ⏎ ${perfect ? (o.level < PANEL ? `다음 ${o.level + 1}개` : "최고 단계!") : `다시 ${o.level}개`}</span>`;
+    }
+  }
+
+  function objPress(key) {
+    const o = obj;
+    if (key === "clear") { tap(20); newObj(3); return; }
+    if (o.stage === "study") {
+      if (key === "enter") { o.stage = "play"; o.picks = []; tap(16); }
+      else { tap(30); return; }
+    } else if (o.stage === "play") {
+      if (key === "back") { if (!o.picks.length) return; o.picks.pop(); tap(8); }
+      else if (key === "enter") { o.stage = "result"; tap(16); }
+      else if (key.startsWith("e:")) {
+        if (o.picks.length >= o.level) { tap(30); return; }
+        o.picks.push(key.slice(2)); tap(8);
+      } else return;
+    } else {
+      if (key === "enter") {
+        const score = o.seq.filter((e, i) => o.picks[i] === e).length;
+        tap(16); newObj(score === o.level ? o.level + 1 : o.level); return;
+      }
+      tap(30); return;
+    }
+    syncPad();
+    render();
+  }
+
   /* ── 크게 보기 ────────────────────────────────────── */
   const zoom = document.getElementById("zoom");
   function openZoom(key, label) {
@@ -515,6 +635,7 @@
   const tap = (ms) => { if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} } };
 
   function press(key) {
+    if (obj) return objPress(key);
     if (game) return gamePress(key);
     if (key === "back") {
       if (!digits) return;
@@ -544,6 +665,13 @@
   }
 
   function syncPad() {
+    if (obj) {
+      const playing = obj.stage === "play";
+      pad.querySelectorAll("button[data-emoji]").forEach((b) => { b.disabled = !playing || obj.picks.length >= obj.level; });
+      pad.querySelector('[data-key="back"]').disabled = !playing || !obj.picks.length;
+      resetBtn.disabled = false;
+      return;
+    }
     const nums = pad.querySelectorAll("button[data-num]");
     const back = pad.querySelector('[data-key="back"]');
     if (game) {
@@ -560,40 +688,62 @@
   }
   resetBtn.addEventListener("click", () => press("clear"));
 
-  /* ── 키패드 ───────────────────────────────────────── */
-  const layout = [["1","2","3"], ["4","5","6"], ["7","8","9"], ["back","0","enter"]];
-  for (const row of layout) {
-    for (const k of row) {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.dataset.key = k;
-      if (k === "back") {
-        b.className = "fn"; b.textContent = "⌫";
-        b.setAttribute("aria-label", "한 자리 지우기 (길게 누르면 전체 삭제)");
-        let timer = null;
-        b.addEventListener("pointerdown", () => { timer = setTimeout(() => { timer = null; press("clear"); }, 500); });
-        b.addEventListener("pointerup", (e) => { if (timer) { clearTimeout(timer); timer = null; press("back"); } e.preventDefault(); });
-        const cancel = () => { clearTimeout(timer); timer = null; };
-        b.addEventListener("pointerleave", cancel);
-        b.addEventListener("pointercancel", cancel);
-      } else if (k === "enter") {
-        b.className = "fn enter"; b.textContent = "⏎";
-        b.setAttribute("aria-label", "확인");
-        b.addEventListener("click", () => press("enter"));
-      } else {
-        b.dataset.num = k; b.textContent = k;
-        b.addEventListener("click", () => press(k));
+  /* ── 키패드 (숫자 / 사물 패널) ────────────────────── */
+  function fnButton(k) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.dataset.key = k;
+    if (k === "back") {
+      b.className = "fn"; b.textContent = "⌫";
+      b.setAttribute("aria-label", "하나 지우기 (길게 누르면 전체 삭제)");
+      let timer = null;
+      b.addEventListener("pointerdown", () => { timer = setTimeout(() => { timer = null; press("clear"); }, 500); });
+      b.addEventListener("pointerup", (e) => { if (timer) { clearTimeout(timer); timer = null; press("back"); } e.preventDefault(); });
+      const cancel = () => { clearTimeout(timer); timer = null; };
+      b.addEventListener("pointerleave", cancel);
+      b.addEventListener("pointercancel", cancel);
+    } else {
+      b.className = "fn enter"; b.textContent = "⏎";
+      b.setAttribute("aria-label", "확인");
+      b.addEventListener("click", () => press("enter"));
+    }
+    return b;
+  }
+
+  function buildPad() {
+    pad.innerHTML = "";
+    pad.classList.toggle("emoji", !!obj);
+    if (obj) {
+      for (const e of obj.pool) {
+        const b = document.createElement("button");
+        b.type = "button"; b.dataset.emoji = e; b.dataset.key = "e:" + e; b.textContent = e;
+        b.addEventListener("click", () => press("e:" + e));
+        pad.appendChild(b);
       }
+      pad.appendChild(fnButton("back"));
+      pad.appendChild(fnButton("enter"));
+      return;
+    }
+    const layout = [["1","2","3"], ["4","5","6"], ["7","8","9"], ["back","0","enter"]];
+    for (const row of layout) for (const k of row) {
+      if (k === "back" || k === "enter") { pad.appendChild(fnButton(k)); continue; }
+      const b = document.createElement("button");
+      b.type = "button"; b.dataset.key = k; b.dataset.num = k; b.textContent = k;
+      b.addEventListener("click", () => press(k));
       pad.appendChild(b);
     }
   }
+  buildPad();
 
   /* ── 헤더 버튼 ────────────────────────────────────── */
   function syncHeader() {
+    document.body.classList.toggle("ingame", !!(game || obj));
+    objBtn.setAttribute("aria-pressed", String(!!obj));
+    objBtn.title = obj ? "사물 게임 끝내기" : "무작위 사물 이모지 순서대로 외우기";
     modeBtn.textContent = quiz ? "퀴즈" : "즉시";
     modeBtn.setAttribute("aria-pressed", String(quiz));
     modeBtn.title = quiz ? "숫자를 다 누르고 ⏎ 를 눌러야 그림이 열립니다" : "누르는 대로 바로 그림이 열립니다";
-    modeBtn.hidden = !!game;
+    modeBtn.hidden = !!(game || obj);
     gameBtn.setAttribute("aria-pressed", String(!!game));
     gameBtn.title = game ? "게임 끝내기" : "무작위 숫자 3개 외우기";
     gameOpt.hidden = !(game && game.stage === "study");
@@ -610,7 +760,8 @@
     syncHeader();
     render();
   });
-  gameBtn.addEventListener("click", () => { game ? endGame() : newGame(); });
+  gameBtn.addEventListener("click", () => { if (obj) { obj = null; buildPad(); } game ? endGame() : newGame(); });
+  objBtn.addEventListener("click", () => { if (obj) return endObj(); game = null; newObj(3); });
   gameOpt.addEventListener("click", () => {
     if (!game) return;
     game.showCards = !game.showCards;
@@ -632,12 +783,15 @@
   syncHeader();
   stage.innerHTML = '<div id="hint"><div class="big">페그 목록을 불러오는 중…</div></div>';
   try {
-    const res = await fetch(PEGS_URL, { cache: "no-cache" });
+    const [res, eres] = await Promise.all([fetch(PEGS_URL, { cache: "no-cache" }), fetch("data/emoji.json", { cache: "no-cache" })]);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     PEGS = await res.json();
+    EMOJI = eres.ok ? await eres.json() : [];
+    objBtn.disabled = EMOJI.length < PANEL;
   } catch (err) {
     pad.querySelectorAll("button").forEach((b) => { b.disabled = true; });
     gameBtn.disabled = true;
+    objBtn.disabled = true;
     stage.innerHTML =
       '<div id="hint">' +
         '<div class="big">페그 목록을 불러오지 못했습니다</div>' +
