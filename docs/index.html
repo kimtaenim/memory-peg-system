@@ -99,7 +99,7 @@
 
   /* ── 카드 ─────────────────────────────────────────── */
   #stage {
-    flex: 1 1 auto; min-height: 0;
+    flex: 1 1 auto; min-height: 0; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
     gap: var(--gap); padding: 0 var(--gap);
   }
@@ -198,6 +198,8 @@
   #reset[disabled] { opacity: .25; box-shadow: none; }
   #display .grp:nth-child(even) { color: var(--gold); }
   #display .score-inline { color: var(--gold); }
+  .caret { display: inline-block; width: 3px; height: .9em; margin-left: .15em; background: var(--gold); vertical-align: -.1em; animation: blink 1s steps(2, start) infinite; }
+  @keyframes blink { to { visibility: hidden; } }
 
   /* ── 키패드 ───────────────────────────────────────── */
   #pad {
@@ -263,7 +265,10 @@
   }
 
   /* 사물 패널: 5열 × 4행 이모지 + ⌫ ⏎ */
-  #pad.emoji { grid-template-columns: repeat(5, 1fr); height: clamp(330px, 54vh, 500px); gap: 4px; padding: 4px var(--gap) var(--gap); }
+  #pad.emoji { grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 4px var(--gap) var(--gap); }
+  #pad.emoji.p15 { height: clamp(270px, 40vh, 380px); }   /* 3행 + ⌫⏎ */
+  #pad.emoji.p20 { height: clamp(300px, 47vh, 430px); }   /* 4행 + ⌫⏎ */
+  #pad.emoji.p30 { height: clamp(330px, 54vh, 500px); }   /* 6행 + ⌫⏎ */
   #pad.emoji button { font-size: clamp(24px, 7vw, 36px); border-radius: 10px; padding: 0; }
   #pad.emoji button[data-emoji]:disabled { opacity: .35; }
   #pad.emoji button[data-key="back"] { grid-column: span 2; font-size: clamp(20px, 6vw, 28px); }
@@ -490,7 +495,7 @@
         inner += i < g.sel
           ? `<span class="gn">${groupedHtml(a)}</span>`
           : i === g.sel
-            ? `<span class="gn">${digits ? groupedHtml(digits) : '<span class="ph">입력 중…</span>'}</span>`
+            ? `<span class="gn">${digits ? groupedHtml(digits) : '<span class="ph">키패드로 입력</span>'}<span class="caret"></span></span>`
             : `<span class="gn"><span class="ph">${"·".repeat(p.length)}</span></span>`;
       } else {
         const ok = g.answers[i] === p;
@@ -522,11 +527,12 @@
         stage.insertAdjacentHTML("beforeend",
           '<div class="gmsg"><b>숫자만 보고 외우세요</b>카드 없이 머릿속으로 그림을 떠올리는 연습<br>다 외웠으면 ⏎</div>');
       }
-      display.innerHTML = '<span class="ph">외운 뒤 ⏎ 를 누르세요</span>';
+      display.innerHTML = '<span class="ph">다 외웠으면 ⏎ → 숫자키가 열립니다</span>';
     } else if (g.stage === "answer") {
       stage.insertAdjacentHTML("beforeend",
-        `<div class="gmsg"><b>${g.sel + 1}번 숫자를 입력하세요</b>카드 없이 기억만으로<br>다 쳤으면 ⏎</div>`);
-      display.innerHTML = digits ? groupedHtml(digits) : `<span class="ph">${g.sel + 1}번 답</span>`;
+        `<div class="gmsg"><b>${g.sel + 1}번 숫자를 키패드로 치세요</b>` +
+        `기억나는 숫자를 그대로 치고 ⏎ 로 제출 → 다음 번호로<br>⌫ 로 고치고, 모르면 아는 데까지만 쳐도 됩니다</div>`);
+      display.innerHTML = (digits ? groupedHtml(digits) : `<span class="ph">${g.sel + 1}번 답</span>`) + '<span class="caret"></span>';
     } else {
       const score = g.problems.filter((p, i) => g.answers[i] === p).length;
       const cards = document.createElement("div");
@@ -543,7 +549,7 @@
 
     if (g.stage === "study") {
       if (key === "enter") { g.stage = "answer"; g.sel = 0; digits = ""; tap(16); }
-      else { tap(30); return; }
+      else { tap(30); display.innerHTML = '<span class="ph">먼저 ⏎ 를 눌러야 입력할 수 있어요</span>'; return; }
     } else if (g.stage === "answer") {
       if (key === "back") { if (!digits) return; digits = digits.slice(0, -1); tap(8); }
       else if (key === "enter") {
@@ -581,12 +587,13 @@
   }
 
   /* ── 사물 게임: 무작위 이모지 n개를 순서대로 외우기 ── */
-  const PANEL = 30;
+  const MAX_LEVEL = 30;
+  const panelSize = (level) => level <= 10 ? 15 : level <= 18 ? 20 : 30;   // 낮은 레벨은 패널을 작게
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
   function newObj(level) {
-    level = Math.min(Math.max(3, level), PANEL);
-    const pool = shuffle(EMOJI).slice(0, PANEL);                // 이번 판 패널 20개 (정답 + 미끼)
+    level = Math.min(Math.max(3, level), MAX_LEVEL);
+    const pool = shuffle(EMOJI).slice(0, panelSize(level));      // 이번 판 패널 (정답 + 미끼)
     obj = {
       level, stage: "study",                                     // study → play → result
       pool: shuffle(pool),                                       // 패널 배치
@@ -631,13 +638,13 @@
     stage.appendChild(row);
 
     if (o.stage === "study") {
-      stage.insertAdjacentHTML("beforeend",
+      if (o.level <= 12) stage.insertAdjacentHTML("beforeend",
         `<div class="gmsg"><b>사물 ${o.level}개를 순서대로 외우세요</b>01 곰인형, 02 영의정… 순번 페그에 엮어 보세요<br>다 외웠으면 ⏎</div>`);
       stage.appendChild(levelRow({
         label: `${o.level}개`,
         prev: o.level > 3 ? () => newObj(o.level - 1) : null,
         reset: o.level > 3 ? () => newObj(3) : null,
-        next: o.level < PANEL ? () => newObj(o.level + 1) : null,
+        next: o.level < MAX_LEVEL ? () => newObj(o.level + 1) : null,
         resetLabel: "3개부터",
       }));
       display.innerHTML = `<span class="score-inline">${o.level}개</span><span class="ph">&nbsp; 외운 뒤 ⏎</span>`;
@@ -647,7 +654,7 @@
       const score = o.seq.filter((e, i) => o.picks[i] === e).length;
       const perfect = score === o.level;
       display.innerHTML = `<span class="score-inline">${score} / ${o.level}</span>` +
-        `<span class="ph">&nbsp; ⏎ ${perfect ? (o.level < PANEL ? `다음 ${o.level + 1}개` : "최고 단계!") : `${o.level}개 다시`}</span>`;
+        `<span class="ph">&nbsp; ⏎ ${perfect ? (o.level < MAX_LEVEL ? `다음 ${o.level + 1}개` : "최고 단계!") : `${o.level}개 다시`}</span>`;
     }
   }
 
@@ -732,7 +739,8 @@
     const back = pad.querySelector('[data-key="back"]');
     if (game) {
       const typing = game.stage === "answer";
-      nums.forEach((b) => { b.disabled = !typing || digits.length >= MAX_DIGITS; });
+      // 외우기 단계에서도 숫자키는 살려 둔다 — 누르면 "먼저 ⏎" 안내가 뜬다
+      nums.forEach((b) => { b.disabled = game.stage === "result" || (typing && digits.length >= MAX_DIGITS); });
       back.disabled = !typing || !digits;
       resetBtn.disabled = false;                             // 게임에서는 ↻ = 새 문제
       return;
@@ -769,7 +777,9 @@
   function buildPad() {
     pad.innerHTML = "";
     pad.classList.toggle("emoji", !!obj);
+    pad.classList.remove("p15", "p20", "p30");
     if (obj) {
+      pad.classList.add("p" + obj.pool.length);
       for (const e of obj.pool) {
         const b = document.createElement("button");
         b.type = "button"; b.dataset.emoji = e; b.dataset.key = "e:" + e; b.textContent = e;
@@ -843,7 +853,7 @@
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     PEGS = await res.json();
     EMOJI = eres.ok ? await eres.json() : [];
-    objBtn.disabled = EMOJI.length < PANEL;
+    objBtn.disabled = EMOJI.length < MAX_LEVEL;
   } catch (err) {
     pad.querySelectorAll("button").forEach((b) => { b.disabled = true; });
     gameBtn.disabled = true;
