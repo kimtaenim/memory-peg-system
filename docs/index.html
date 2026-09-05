@@ -213,6 +213,16 @@
     box-shadow: 0 0 0 3px #e2bb6022;
   }
   #reset:active { background: var(--gold); color: var(--gold-ink); }
+  #home2 {
+    position: absolute; left: 7px; top: 50%; transform: translateY(-50%);
+    width: clamp(34px, 9vw, 44px); height: clamp(34px, 9vw, 44px); border-radius: 50%;
+    border: 2px solid var(--gold); background: #2b2555; color: var(--gold);
+    line-height: 1; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 3px #e2bb6022;
+  }
+  #home2[hidden] { display: none; }
+  #home2:active { background: var(--gold); color: var(--gold-ink); }
+  body.ingame #digits { padding-left: clamp(40px, 11vw, 52px); }
   #reset[disabled] { opacity: .25; box-shadow: none; }
   #display .grp:nth-child(even) { color: var(--gold); }
   #display .score-inline { color: var(--gold); }
@@ -340,7 +350,7 @@
 
   <section id="stage" aria-live="polite"></section>
 
-  <div id="display"><span id="digits"><span class="ph">숫자를 누르세요</span></span><button id="reset" type="button" aria-label="처음부터" title="처음부터"><svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8"/><path d="M20 4v5h-5"/></svg></button></div>
+  <div id="display"><button id="home2" type="button" aria-label="첫 화면으로" title="첫 화면(숫자 페그)으로" hidden><svg viewBox="0 0 24 24" width="58%" height="58%" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg></button><span id="digits"><span class="ph">숫자를 누르세요</span></span><button id="reset" type="button" aria-label="처음부터" title="처음부터"><svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8"/><path d="M20 4v5h-5"/></svg></button></div>
 </div>
 
 <div id="pad"></div>
@@ -871,6 +881,7 @@
   /* ── 헤더 버튼 ────────────────────────────────────── */
   function syncHeader() {
     document.body.classList.toggle("ingame", !!(game || obj));
+    document.getElementById("home2").hidden = !(game || obj);
     objBtn.setAttribute("aria-pressed", String(!!obj));
     objBtn.title = obj ? "게임2 끝내기" : "게임2: 무작위 사물 이모지 순서대로 외우기";
     modeBtn.textContent = quiz ? "퀴즈" : "즉시";
@@ -893,10 +904,12 @@
     syncHeader();
     render();
   });
-  document.getElementById("homebtn").addEventListener("click", () => {
+  const goHome = () => {
     if (!game && !obj) return;
     tap(10); obj = null; game = null; digits = ""; buildPad(); syncHeader(); syncPad(); render();
-  });
+  };
+  document.getElementById("homebtn").addEventListener("click", goHome);
+  document.getElementById("home2").addEventListener("click", goHome);
   gameBtn.addEventListener("click", () => { if (obj) { obj = null; buildPad(); } game ? endGame() : newGame(); });
   objBtn.addEventListener("click", () => { if (obj) return endObj(); game = null; newObj(); });
   gameOpt.addEventListener("click", () => {
