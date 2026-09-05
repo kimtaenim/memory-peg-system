@@ -236,6 +236,17 @@
   .oseq .oa { font-size: .55em; line-height: 1; opacity: .85; }
   #stage.obj { justify-content: center; }
   #stage.obj .gmsg { flex: 0 0 auto; padding-top: 4px; }
+  /* 작은 폰(세로 700px 이하): 안내문 숨기고 이모지를 한 단계 줄여 20개까지 한 화면에 */
+  @media (max-height: 700px) {
+    #stage.obj .gmsg { display: none; }
+    .oseq.xl .oe { font-size: clamp(44px, 15vw, 72px); }
+    .oseq.lg .oe { font-size: clamp(32px, 10vw, 48px); }
+    .oseq.md .oe { font-size: clamp(24px, 7.5vw, 36px); }
+    .oseq.sm .oe { font-size: clamp(20px, 6vw, 28px); }
+    .oseq { gap: 2px 2px; padding: 2px 0; }
+    .ocell { padding: 2px 4px; gap: 0; }
+    .oseq .oa { font-size: .5em; }
+  }
 
   /* 사물 패널: 5열 × 4행 이모지 + ⌫ ⏎ */
   #pad.emoji { grid-template-columns: repeat(5, 1fr); height: clamp(300px, 50vh, 460px); gap: 5px; }
