@@ -226,10 +226,14 @@
   .ocell.cur { border-color: var(--gold); background: #2b2555; }
   .ocell.ok { background: #1f3a2c; } .ocell.ng { background: #3d2230; }
   .oseq .oe { line-height: 1; }
-  .oseq.xl .oe { font-size: clamp(56px, 19vw, 96px); }
+  .oseq.xl .oe { font-size: clamp(52px, 15vw, 84px); }
   .oseq.lg .oe { font-size: clamp(40px, 13vw, 64px); }
   .oseq.md .oe { font-size: clamp(30px, 9vw, 48px); }
   .oseq.sm .oe { font-size: clamp(24px, 7vw, 36px); }
+  .oseq.xs .oe { font-size: clamp(19px, 5.4vw, 28px); }
+  .oseq.xs .on { font-size: clamp(10px, 2.8vw, 12px); }
+  .oseq.xs .ocell { padding: 2px 3px; gap: 0; }
+  .oseq.xs { gap: 3px 2px; }
   .oseq .oq { color: #5a52a0; font-weight: 900; }
   .oseq .on { font-size: clamp(11px, 3.2vw, 14px); font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
   .oseq .on b.ok { color: #6fd39a; } .oseq .on b.ng { color: #ff7a7a; }
@@ -243,14 +247,15 @@
     .oseq.lg .oe { font-size: clamp(32px, 10vw, 48px); }
     .oseq.md .oe { font-size: clamp(24px, 7.5vw, 36px); }
     .oseq.sm .oe { font-size: clamp(20px, 6vw, 28px); }
+    .oseq.xs .oe { font-size: clamp(16px, 4.6vw, 22px); }
     .oseq { gap: 2px 2px; padding: 2px 0; }
     .ocell { padding: 2px 4px; gap: 0; }
     .oseq .oa { font-size: .5em; }
   }
 
   /* 사물 패널: 5열 × 4행 이모지 + ⌫ ⏎ */
-  #pad.emoji { grid-template-columns: repeat(5, 1fr); height: clamp(300px, 50vh, 460px); gap: 5px; }
-  #pad.emoji button { font-size: clamp(26px, 8vw, 40px); border-radius: 12px; padding: 0; }
+  #pad.emoji { grid-template-columns: repeat(5, 1fr); height: clamp(330px, 54vh, 500px); gap: 4px; padding: 4px var(--gap) var(--gap); }
+  #pad.emoji button { font-size: clamp(24px, 7vw, 36px); border-radius: 10px; padding: 0; }
   #pad.emoji button[data-emoji]:disabled { opacity: .35; }
   #pad.emoji button[data-key="back"] { grid-column: span 2; font-size: clamp(20px, 6vw, 28px); }
   #pad.emoji button[data-key="enter"] { grid-column: span 3; font-size: clamp(20px, 6vw, 28px); }
@@ -543,7 +548,7 @@
   }
 
   /* ── 사물 게임: 무작위 이모지 n개를 순서대로 외우기 ── */
-  const PANEL = 20;
+  const PANEL = 30;
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
   function newObj(level) {
@@ -560,7 +565,7 @@
   function endObj() { obj = null; syncHeader(); buildPad(); syncPad(); render(); }
 
   const ord = (i) => String(i + 1).padStart(2, "0");
-  const sizeClass = (n) => n <= 4 ? "xl" : n <= 8 ? "lg" : n <= 12 ? "md" : "sm";
+  const sizeClass = (n) => n <= 4 ? "xl" : n <= 8 ? "lg" : n <= 12 ? "md" : n <= 20 ? "sm" : "xs";
 
   function renderObj() {
     const o = obj;
@@ -602,13 +607,13 @@
       const score = o.seq.filter((e, i) => o.picks[i] === e).length;
       const perfect = score === o.level;
       display.innerHTML = `<span class="score-inline">${score} / ${o.level}</span>` +
-        `<span class="ph">&nbsp; ⏎ ${perfect ? (o.level < PANEL ? `다음 ${o.level + 1}개` : "최고 단계!") : `다시 ${o.level}개`}</span>`;
+        `<span class="ph">&nbsp; ⏎ ${perfect ? (o.level < PANEL ? `다음 ${o.level + 1}개` : "최고 단계!") : `${o.level}개 다시`}</span>`;
     }
   }
 
   function objPress(key) {
     const o = obj;
-    if (key === "clear") { tap(20); newObj(3); return; }
+    if (key === "clear") { tap(20); newObj(o.level); return; }          // ↻ = 같은 개수로 새 판
     if (o.stage === "study") {
       if (key === "enter") { o.stage = "play"; o.picks = []; tap(16); }
       else { tap(30); return; }
