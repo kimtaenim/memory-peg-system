@@ -268,7 +268,7 @@
   .oseq .oe { line-height: 1; }
   .oseq.xl .oe { font-size: clamp(52px, 15vw, 84px); }
   .oseq.lg .oe { font-size: clamp(40px, 13vw, 64px); }
-  .oseq.md .oe { font-size: clamp(30px, 9vw, 48px); }
+  .oseq.md .oe { font-size: clamp(28px, 8vw, 42px); }
   .oseq.sm .oe { font-size: clamp(24px, 7vw, 36px); }
   .oseq.xs .oe { font-size: clamp(19px, 5.4vw, 28px); }
   .oseq.xs .on { font-size: clamp(10px, 2.8vw, 12px); }
@@ -278,7 +278,9 @@
   .oseq .on { font-size: clamp(11px, 3.2vw, 14px); font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
   .oseq .on b.ok { color: #6fd39a; } .oseq .on b.ng { color: #ff7a7a; }
   .oseq .oa { font-size: .55em; line-height: 1; opacity: .85; }
-  #stage.obj { justify-content: center; }
+  #stage.obj { justify-content: flex-start; overflow-y: auto; }
+  #stage.obj .oseq { flex: 0 0 auto; }
+  #stage.obj .gmsg { flex: 0 0 auto; padding-top: 2px; }
   /* 순번 페그 설명이 옆으로 흐르는 띠 */
   .ticker { flex: 0 0 auto; overflow: hidden; white-space: nowrap; margin: 2px var(--gap) 0;
     font-size: clamp(12px, 3.3vw, 14px); font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums;
@@ -306,6 +308,7 @@
   #pad.emoji.p15 { height: clamp(270px, 40vh, 380px); }   /* 3행 + ⌫⏎ */
   #pad.emoji.p20 { height: clamp(300px, 47vh, 430px); }   /* 4행 + ⌫⏎ */
   #pad.emoji.p30 { height: clamp(330px, 54vh, 500px); }   /* 6행 + ⌫⏎ */
+  @media (max-height: 860px) { #pad.emoji.p30 { height: clamp(300px, 50vh, 440px); } }
   #pad.emoji button { font-size: clamp(24px, 7vw, 36px); border-radius: 10px; padding: 0; }
   #pad.emoji button[data-emoji]:disabled { opacity: .35; }
   #pad.emoji button[data-key="back"] { grid-column: span 2; font-size: clamp(20px, 6vw, 28px); }
@@ -707,8 +710,6 @@
       ticker.className = "ticker";
       ticker.innerHTML = `<div class="tk" style="animation-duration:${8 + o.level * 1.6}s">${escapeHtml(pegsText)}</div>`;
       stage.appendChild(ticker);
-      if (o.level <= 12) stage.insertAdjacentHTML("beforeend",
-        `<div class="gmsg"><b>사물 ${o.level}개를 순서대로 외우세요</b>순번 페그에 하나씩 엮어 보세요 · 다 외웠으면 ⏎<br>맞히면 앞의 사물은 그대로, 뒤에 하나가 더 붙습니다</div>`);
       stage.appendChild(levelRow({
         label: `${o.level}개`,
         prev: o.level > 3 ? () => newObj(o.level - 1, o.seq) : null,
@@ -716,6 +717,8 @@
         next: o.level < MAX_LEVEL ? () => newObj(o.level + 1, o.seq) : null,
         resetLabel: "3개부터",
       }));
+      if (o.level <= 8) stage.insertAdjacentHTML("beforeend",
+        `<div class="gmsg"><b>사물 ${o.level}개를 순서대로 외우세요</b>순번 페그에 하나씩 엮어 보세요 · 다 외웠으면 ⏎<br>맞히면 앞의 사물은 그대로, 뒤에 하나가 더 붙습니다</div>`);
       display.innerHTML = `<span class="score-inline">${o.level}개</span><span class="ph">&nbsp; 외운 뒤 ⏎</span>`;
     } else if (o.stage === "play") {
       display.innerHTML = `<span class="score-inline">${o.picks.length} / ${o.level}</span><span class="ph">&nbsp; 순서대로 고르고 ⏎</span>`;
