@@ -253,6 +253,8 @@
   .oseq { flex: 0 1 auto; display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 6px 4px; padding: 6px 0; }
   .ocell { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 6px; border-radius: 12px; border: 2px solid transparent; }
   .ocell.cur { border-color: var(--gold); background: #2b2555; }
+  .ocell.new { border-color: var(--gold); background: #2b2555; }
+  .ocell.new .on::after { content: " 새"; font-size: .8em; color: var(--ink); }
   .ocell.ok { background: #1f3a2c; } .ocell.ng { background: #3d2230; }
   .oseq .oe { line-height: 1; }
   .oseq.xl .oe { font-size: clamp(52px, 15vw, 84px); }
@@ -644,15 +646,20 @@
   const panelSize = (level) => level <= 10 ? 15 : level <= 18 ? 20 : 30;   // 낮은 레벨은 패널을 작게
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-  function newObj(level) {
+  /* keep: 이어갈 순서. 레벨이 오르면 뒤에 하나만 붙고, 내리면 마지막 것만 뗀다. 없으면 새 판. */
+  function newObj(level, keep) {
     if (level === undefined) level = Number(localStorage.getItem("peg.level2") || 3);
     level = Math.min(Math.max(3, level), MAX_LEVEL);
     localStorage.setItem("peg.level2", String(level));
-    const pool = shuffle(EMOJI).slice(0, panelSize(level));      // 이번 판 패널 (정답 + 미끼)
+    const seq = (keep || []).slice(0, level);
+    const rest = shuffle(EMOJI.filter((e) => !seq.includes(e)));
+    while (seq.length < level) seq.push(rest.pop());              // 새로 추가되는 사물
+    const decoys = rest.slice(0, panelSize(level) - seq.length);  // 나머지 패널은 미끼
     obj = {
+      isNew: keep ? seq.filter((e) => !keep.includes(e)) : [],   // 이번에 새로 들어온 사물 (강조 표시)
       level, stage: "study",                                     // study → play → result
-      pool: shuffle(pool),                                       // 패널 배치
-      seq: shuffle(pool).slice(0, level),                        // 외울 순서
+      pool: shuffle(seq.concat(decoys)),                         // 패널 배치
+      seq,                                                       // 외울 순서
       picks: [],
     };
     syncHeader(); buildPad(); syncPad(); render();
@@ -675,6 +682,7 @@
       const cell = document.createElement("div");
       cell.className = "ocell";
       if (o.stage === "study") {
+        if (o.isNew && o.isNew.includes(e)) cell.className += " new";
         cell.innerHTML = `<div class="oe">${e}</div><div class="on">${ord(i)}</div>`;
       } else if (o.stage === "play") {
         const p = o.picks[i];
@@ -699,12 +707,12 @@
       ticker.innerHTML = `<div class="tk" style="animation-duration:${8 + o.level * 1.6}s">${escapeHtml(pegsText)}</div>`;
       stage.appendChild(ticker);
       if (o.level <= 12) stage.insertAdjacentHTML("beforeend",
-        `<div class="gmsg"><b>사물 ${o.level}개를 순서대로 외우세요</b>순번 페그에 하나씩 엮어 보세요 · 다 외웠으면 ⏎</div>`);
+        `<div class="gmsg"><b>사물 ${o.level}개를 순서대로 외우세요</b>순번 페그에 하나씩 엮어 보세요 · 다 외웠으면 ⏎<br>맞히면 앞의 사물은 그대로, 뒤에 하나가 더 붙습니다</div>`);
       stage.appendChild(levelRow({
         label: `${o.level}개`,
-        prev: o.level > 3 ? () => newObj(o.level - 1) : null,
+        prev: o.level > 3 ? () => newObj(o.level - 1, o.seq) : null,
         reset: o.level > 3 ? () => newObj(3) : null,
-        next: o.level < MAX_LEVEL ? () => newObj(o.level + 1) : null,
+        next: o.level < MAX_LEVEL ? () => newObj(o.level + 1, o.seq) : null,
         resetLabel: "3개부터",
       }));
       display.innerHTML = `<span class="score-inline">${o.level}개</span><span class="ph">&nbsp; 외운 뒤 ⏎</span>`;
@@ -734,7 +742,7 @@
     } else {
       if (key === "enter") {
         const score = o.seq.filter((e, i) => o.picks[i] === e).length;
-        tap(16); newObj(score === o.level ? o.level + 1 : o.level); return;
+        tap(16); newObj(score === o.level ? o.level + 1 : o.level, o.seq); return;   // 앞의 사물은 그대로
       }
       tap(30); return;
     }
