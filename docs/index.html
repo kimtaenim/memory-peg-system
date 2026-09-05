@@ -190,7 +190,7 @@
     width: calc(100% - var(--gap) * 2); max-width: calc(var(--col) - var(--gap) * 2);
   }
   #display { position: relative; }
-  #digits { display: flex; align-items: center; gap: .35em; }
+  #digits { display: flex; align-items: center; gap: .35em; padding-right: clamp(40px, 11vw, 52px); }
   #display .ph { color: #4d4488; font-size: .6em; letter-spacing: 0; }
   /* 오른쪽 작은 새로고침(전체 지우기) 버튼 */
   #reset {
@@ -467,7 +467,7 @@
       stage: "study",                                       // study → answer → result
       showCards: localStorage.getItem("peg.gamecards") !== "0",
       count, len,
-      problems: Array.from({ length: count }, () => randomNumber(len)),
+      problems: (() => { const out = []; while (out.length < count) { const n = randomNumber(len); if (!out.includes(n)) out.push(n); } return out; })(),  // 중복 없이
       answers: Array(count).fill(""),
       sel: 0,
     };
@@ -549,7 +549,7 @@
         stage.insertAdjacentHTML("beforeend",
           '<div class="gmsg"><b>숫자만 보고 외우세요</b>카드 없이 머릿속으로 그림을 떠올리는 연습<br>다 외웠으면 ⏎</div>');
       }
-      display.innerHTML = '<span class="ph">다 외웠으면 ⏎ → 숫자키가 열립니다</span>';
+      display.innerHTML = '<span class="ph">외웠으면 ⏎ → 입력 시작</span>';
     } else if (g.stage === "answer") {
       stage.insertAdjacentHTML("beforeend",
         `<div class="gmsg"><b>${g.sel + 1}번 숫자를 키패드로 치세요</b>` +
