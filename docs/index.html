@@ -919,6 +919,28 @@
 
   syncPad();
   render();
+
+  /* ── 오프라인·즉시 표시: 서비스 워커 + 카드 미리 받기 ── */
+  if ("serviceWorker" in navigator) {
+    try {
+      await navigator.serviceWorker.register("sw.js");
+      // 절약 모드나 느린 망이 아니면, 한가할 때 카드 전부를 조용히 받아 둔다 (110장 ≈ 22MB, 한 번만)
+      const conn = navigator.connection || {};
+      const slow = conn.saveData || /(^|-)2g$|3g/.test(conn.effectiveType || "");
+      if (!slow && localStorage.getItem("peg.prefetched") !== "1") {
+        const keys = Object.keys(PEGS).sort((a, b) => b.length - a.length);   // 두 자리 먼저
+        let i = 0, failed = 0;
+        const pump = async () => {
+          while (i < keys.length) {
+            const key = keys[i++];
+            try { await fetch(imgSrc(key), { cache: "force-cache" }); } catch { failed++; }
+          }
+        };
+        const start = () => Promise.all([pump(), pump()]).then(() => { if (!failed) localStorage.setItem("peg.prefetched", "1"); });
+        if ("requestIdleCallback" in window) requestIdleCallback(start, { timeout: 4000 }); else setTimeout(start, 2500);
+      }
+    } catch (e) { /* 지원 안 하면 그냥 온라인으로 */ }
+  }
 })();
 </script>
 </body>
