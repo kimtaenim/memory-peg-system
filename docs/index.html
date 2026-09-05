@@ -51,9 +51,20 @@
     display: flex; align-items: center; justify-content: space-between;
     gap: 8px; padding: 6px var(--gap) 2px;
   }
-  .brand { font-size: clamp(12px, 3.2vw, 15px); font-weight: 700; letter-spacing: -.02em; color: var(--muted); }
+  .brand {
+    appearance: none; border: 1px solid transparent; background: none; padding: 6px 10px 6px 0; margin: 0;
+    font: inherit; font-size: clamp(12px, 3.2vw, 15px); font-weight: 700; letter-spacing: -.02em; color: var(--muted);
+    border-radius: 999px; cursor: pointer; text-align: left;
+  }
   .brand b { color: var(--ink); }
+  .brand .back { display: none; }
+  /* 게임 중: 돌아가기 버튼으로 또렷하게 */
+  body.ingame .brand { border-color: var(--gold); padding: 6px 14px; color: var(--gold); }
+  body.ingame .brand b { color: var(--gold); }
+  body.ingame .brand .back { display: inline; }
   body.ingame .brand .sub { display: none; }
+  body.ingame .brand:active { background: var(--gold); color: var(--gold-ink); }
+  body.ingame .brand:active b { color: var(--gold-ink); }
   #mode {
     appearance: none; border: 1px solid var(--edge); background: var(--panel);
     color: var(--ink); border-radius: 999px; padding: 6px 14px;
@@ -317,7 +328,7 @@
 
 <div class="lhs">
   <header>
-    <div class="brand"><b>숫자 페그</b><span class="sub"> · 모양(0–9) · 소리(00–99)</span></div>
+    <button id="homebtn" class="brand" type="button" title="첫 화면(숫자 페그)으로"><span class="back">◀ </span><b>숫자 페그</b><span class="sub"> · 모양(0–9) · 소리(00–99)</span></button>
     <div class="hbtns">
       <button id="gameopt" type="button" aria-pressed="true" hidden>카드</button>
       <button id="mode" type="button" aria-pressed="false">즉시</button>
@@ -874,6 +885,10 @@
     revealed.clear();
     syncHeader();
     render();
+  });
+  document.getElementById("homebtn").addEventListener("click", () => {
+    if (!game && !obj) return;
+    tap(10); obj = null; game = null; digits = ""; buildPad(); syncHeader(); syncPad(); render();
   });
   gameBtn.addEventListener("click", () => { if (obj) { obj = null; buildPad(); } game ? endGame() : newGame(); });
   objBtn.addEventListener("click", () => { if (obj) return endObj(); game = null; newObj(); });
