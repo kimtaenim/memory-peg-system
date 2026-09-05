@@ -650,6 +650,22 @@
   const panelSize = (level) => level <= 10 ? 15 : level <= 18 ? 20 : 30;   // 낮은 레벨은 패널을 작게
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
+  /* 진행 중인 판을 저장해 두고(순서·패널), 나갔다 와도 ↻ 나 "3개부터"를 누르기 전엔 그대로 이어간다 */
+  function saveObj() {
+    if (obj) localStorage.setItem("peg.obj", JSON.stringify({ level: obj.level, seq: obj.seq, pool: obj.pool }));
+  }
+  function resumeObj() {
+    try {
+      const d = JSON.parse(localStorage.getItem("peg.obj") || "null");
+      if (!d || !Array.isArray(d.seq) || d.seq.length !== d.level || !Array.isArray(d.pool)) return false;
+      if (!d.seq.every((e) => EMOJI.includes(e) && d.pool.includes(e))) return false;
+      obj = { level: d.level, stage: "study", pool: d.pool, seq: d.seq, picks: [], isNew: [] };
+      localStorage.setItem("peg.level2", String(d.level));
+      syncHeader(); buildPad(); syncPad(); render();
+      return true;
+    } catch { return false; }
+  }
+
   /* keep: 이어갈 순서. 레벨이 오르면 뒤에 하나만 붙고, 내리면 마지막 것만 뗀다. 없으면 새 판. */
   function newObj(level, keep) {
     if (level === undefined) level = Number(localStorage.getItem("peg.level2") || 3);
@@ -666,6 +682,7 @@
       seq,                                                       // 외울 순서
       picks: [],
     };
+    saveObj();
     syncHeader(); buildPad(); syncPad(); render();
   }
   function endObj() { obj = null; syncHeader(); buildPad(); syncPad(); render(); }
@@ -900,7 +917,7 @@
   document.getElementById("homebtn").addEventListener("click", goHome);
   document.getElementById("home2").addEventListener("click", goHome);
   gameBtn.addEventListener("click", () => { if (obj) { obj = null; buildPad(); } game ? endGame() : newGame(); });
-  objBtn.addEventListener("click", () => { if (obj) return endObj(); game = null; newObj(); });
+  objBtn.addEventListener("click", () => { if (obj) return endObj(); game = null; if (!resumeObj()) newObj(); });
 
   /* 물리 키보드 (데스크톱) */
   addEventListener("keydown", (e) => {
