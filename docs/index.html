@@ -59,6 +59,42 @@
     font: inherit; font-size: clamp(11px, 3vw, 14px); font-weight: 700; cursor: pointer;
   }
   #mode[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
+  .hbtns { display: flex; gap: 6px; }
+  .hbtns button {
+    appearance: none; border: 1px solid var(--edge); background: var(--panel);
+    color: var(--ink); border-radius: 999px; padding: 6px 14px;
+    font: inherit; font-size: clamp(11px, 3vw, 14px); font-weight: 700; cursor: pointer;
+  }
+  .hbtns button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
+  .hbtns button[hidden] { display: none; }
+
+  /* ── 게임 ─────────────────────────────────────────── */
+  #stage.game { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 8px; }
+  .glist { flex: 0 0 auto; display: flex; flex-direction: column; gap: 5px; }
+  .grow {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 10px; border-radius: 12px;
+    background: var(--panel); border: 1px solid var(--edge); cursor: pointer;
+    font-variant-numeric: tabular-nums;
+  }
+  .grow.sel { border-color: var(--gold); background: #2b2555; }
+  .grow .gi { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; background: var(--panel-2);
+    color: var(--muted); font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .grow.sel .gi { background: var(--gold); color: var(--gold-ink); }
+  .grow .gn { flex: 1 1 auto; font-size: clamp(20px, 6vw, 28px); font-weight: 900; letter-spacing: .06em; display: flex; gap: .3em; }
+  .grow .gn .grp:nth-child(even) { color: var(--gold); }
+  .grow .gn .ph { color: #4d4488; font-size: .7em; letter-spacing: 0; font-weight: 700; }
+  .grow .ga { font-size: clamp(14px, 4vw, 18px); font-weight: 800; letter-spacing: .05em; color: var(--muted); }
+  .grow .ga.ok { color: #6fd39a; }
+  .grow .ga.ng { color: #ff7a7a; text-decoration: line-through; }
+  .grow .gmark { flex: 0 0 auto; font-size: 18px; font-weight: 900; }
+  .grow .gmark.ok { color: #6fd39a; } .grow .gmark.ng { color: #ff7a7a; }
+  .gcards .card { max-height: 100%; }
+  .gcards { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; gap: var(--gap); }
+  .gmsg { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    text-align: center; color: var(--muted); font-size: clamp(13px, 3.6vw, 16px); line-height: 1.6; }
+  .gmsg b { color: var(--ink); font-size: 1.15em; }
+  .gmsg .score { font-size: clamp(26px, 8vw, 40px); font-weight: 900; color: var(--gold); }
 
   /* ── 카드 ─────────────────────────────────────────── */
   #stage {
@@ -75,7 +111,7 @@
     overflow: hidden; animation: pop .18s ease-out;
   }
   @keyframes pop { from { transform: scale(.94); opacity: 0 } to { transform: none; opacity: 1 } }
-  #stage[data-n="1"] .card { flex: 0 0 auto; width: 62%; }
+  [data-n="1"] .card { flex: 0 0 auto; width: 62%; }
 
   .card .pic {
     flex: 1 1 auto; min-height: 0;
@@ -108,9 +144,9 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
   }
   /* 카드 3장이면 폭이 좁으니 숫자 위·키워드 아래로 쌓고, 긴 키워드는 두 줄까지 */
-  #stage[data-n="3"] .card .cap { flex-direction: column; align-items: center; gap: 0; padding: 4px 4px 6px; }
-  #stage[data-n="3"] .card .num { font-size: clamp(12px, 3.6vw, 17px); line-height: 1.1; }
-  #stage[data-n="3"] .card .label {
+  [data-n="3"] .card .cap { flex-direction: column; align-items: center; gap: 0; padding: 4px 4px 6px; }
+  [data-n="3"] .card .num { font-size: clamp(12px, 3.6vw, 17px); line-height: 1.1; }
+  [data-n="3"] .card .label {
     font-size: clamp(11px, 3.2vw, 15px); line-height: 1.2; text-align: center;
     white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   }
@@ -160,6 +196,7 @@
   #reset:active { background: var(--gold); color: var(--gold-ink); }
   #reset[disabled] { opacity: .25; box-shadow: none; }
   #display .grp:nth-child(even) { color: var(--gold); }
+  #display .score-inline { color: var(--gold); }
 
   /* ── 키패드 ───────────────────────────────────────── */
   #pad {
@@ -211,7 +248,11 @@
 <div class="lhs">
   <header>
     <div class="brand"><b>숫자 페그</b> · 모양(0–9) · 소리(00–99)</div>
-    <button id="mode" type="button" aria-pressed="false">즉시</button>
+    <div class="hbtns">
+      <button id="gameopt" type="button" aria-pressed="true" hidden>카드</button>
+      <button id="mode" type="button" aria-pressed="false">즉시</button>
+      <button id="gamebtn" type="button" aria-pressed="false">게임</button>
+    </div>
   </header>
 
   <section id="stage" aria-live="polite"></section>
@@ -239,10 +280,13 @@
   const resetBtn = document.getElementById("reset");
   const pad = document.getElementById("pad");
   const modeBtn = document.getElementById("mode");
+  const gameBtn = document.getElementById("gamebtn");
+  const gameOpt = document.getElementById("gameopt");
 
   let digits = "";
   let quiz = localStorage.getItem("peg.quiz") === "1";
   const revealed = new Set();           // 퀴즈 모드에서 공개된 카드 index
+  let game = null;                      // 게임 상태 (null 이면 자유 모드)
 
   /* 8396 → ["83","96"],  542 → ["5","42"] : 홀수면 맨 앞만 한 자리 */
   function chunk(s) {
@@ -258,21 +302,61 @@
   const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  /* ── 그리기 ───────────────────────────────────────── */
+  /* 숫자를 청크별로 색 구분해서 span 으로 */
+  function groupedHtml(s) {
+    return chunk(s).map((c) => `<span class="grp">${c}</span>`).join("");
+  }
+
+  /* ── 카드 한 장 ───────────────────────────────────── */
+  function makeCard(key, { hide = false, onClick = null } = {}) {
+    const label = PEGS[key] || "?";
+    const card = document.createElement("div");
+    card.className = "card" + (hide ? " hidden" : "");
+
+    const pic = document.createElement("div");
+    pic.className = "pic";
+
+    const img = document.createElement("img");
+    img.alt = `${key} ${label}`;
+    img.decoding = "async";
+    img.src = imgSrc(key);
+    img.addEventListener("error", () => card.classList.add("noimg"), { once: true });
+
+    const fb = document.createElement("div");
+    fb.className = "fallback";
+    fb.innerHTML = `<div class="fnum">${key}</div><div class="fhint">그림 생성 전</div>`;
+
+    const qm = document.createElement("div");
+    qm.className = "qmark";
+    qm.textContent = "?";
+
+    pic.append(img, fb, qm);
+
+    const cap = document.createElement("div");
+    cap.className = "cap";
+    cap.innerHTML = `<span class="num">${key}</span>` +
+                    `<span class="label">${hide ? "???" : escapeHtml(label)}</span>`;
+
+    card.append(pic, cap);
+    if (onClick) card.addEventListener("click", onClick);
+    else if (!hide && PEGS[key]) card.addEventListener("click", () => openZoom(key, label));
+    return card;
+  }
+
+  /* 여러 장을 한 줄로 */
+  function fillCards(container, keys, opts = {}) {
+    container.innerHTML = "";
+    container.dataset.n = String(keys.length);
+    keys.forEach((key, idx) => container.appendChild(makeCard(key, typeof opts === "function" ? opts(key, idx) : opts)));
+  }
+
+  /* ── 자유 모드 그리기 ──────────────────────────────── */
   function render() {
+    if (game) return renderGame();
+    stage.classList.remove("game");
     const chunks = chunk(digits);
 
-    display.innerHTML = "";
-    if (!chunks.length) {
-      display.innerHTML = '<span class="ph">숫자를 누르세요</span>';
-    } else {
-      for (const c of chunks) {
-        const el = document.createElement("span");
-        el.className = "grp";
-        el.textContent = c;
-        display.appendChild(el);
-      }
-    }
+    display.innerHTML = chunks.length ? groupedHtml(digits) : '<span class="ph">숫자를 누르세요</span>';
 
     stage.innerHTML = "";
     stage.dataset.n = String(chunks.length);
@@ -289,41 +373,130 @@
     }
 
     chunks.forEach((key, idx) => {
-      const label = PEGS[key] || "?";
       const hide = quiz && !revealed.has(idx);
-
-      const card = document.createElement("div");
-      card.className = "card" + (hide ? " hidden" : "");
-
-      const pic = document.createElement("div");
-      pic.className = "pic";
-
-      const img = document.createElement("img");
-      img.alt = `${key} ${label}`;
-      img.decoding = "async";
-      img.src = imgSrc(key);
-      img.addEventListener("error", () => card.classList.add("noimg"), { once: true });
-
-      const fb = document.createElement("div");
-      fb.className = "fallback";
-      fb.innerHTML = `<div class="fnum">${key}</div><div class="fhint">그림 생성 전</div>`;
-
-      const qm = document.createElement("div");
-      qm.className = "qmark";
-      qm.textContent = "?";
-
-      pic.append(img, fb, qm);
-
-      const cap = document.createElement("div");
-      cap.className = "cap";
-      cap.innerHTML = `<span class="num">${key}</span>` +
-                      `<span class="label">${hide ? "???" : escapeHtml(label)}</span>`;
-
-      card.append(pic, cap);
-      if (hide) card.addEventListener("click", () => { revealed.add(idx); render(); });
-      else if (PEGS[key]) card.addEventListener("click", () => openZoom(key, label));
-      stage.appendChild(card);
+      stage.appendChild(makeCard(key, {
+        hide,
+        onClick: hide ? () => { revealed.add(idx); render(); } : null,
+      }));
     });
+  }
+
+  /* ── 게임 ─────────────────────────────────────────── */
+  function randomNumber() {
+    const n = 3 + Math.floor(Math.random() * 3);          // 3~5자리
+    let s = String(1 + Math.floor(Math.random() * 9));     // 첫 자리는 0 제외
+    while (s.length < n) s += String(Math.floor(Math.random() * 10));
+    return s;
+  }
+
+  function newGame() {
+    game = {
+      stage: "study",                                       // study → answer → result
+      showCards: localStorage.getItem("peg.gamecards") !== "0",
+      problems: [randomNumber(), randomNumber(), randomNumber()],
+      answers: ["", "", ""],
+      sel: 0,
+    };
+    digits = "";
+    syncHeader();
+    syncPad();
+    render();
+  }
+
+  function endGame() {
+    game = null;
+    digits = "";
+    syncHeader();
+    syncPad();
+    render();
+  }
+
+  function renderGame() {
+    const g = game;
+    stage.classList.add("game");
+    stage.innerHTML = "";
+    delete stage.dataset.n;
+
+    // 위: 문제 목록
+    const list = document.createElement("div");
+    list.className = "glist";
+    g.problems.forEach((p, i) => {
+      const row = document.createElement("div");
+      row.className = "grow" + (i === g.sel ? " sel" : "");
+      let inner = `<span class="gi">${i + 1}</span>`;
+      if (g.stage === "study") {
+        inner += `<span class="gn">${groupedHtml(p)}</span>`;
+      } else if (g.stage === "answer") {
+        const a = g.answers[i];
+        inner += i < g.sel
+          ? `<span class="gn">${groupedHtml(a)}</span>`
+          : i === g.sel
+            ? `<span class="gn">${digits ? groupedHtml(digits) : '<span class="ph">입력 중…</span>'}</span>`
+            : `<span class="gn"><span class="ph">${"·".repeat(p.length)}</span></span>`;
+      } else {
+        const ok = g.answers[i] === p;
+        inner += `<span class="gn">${groupedHtml(p)}</span>` +
+                 `<span class="ga ${ok ? "ok" : "ng"}">${escapeHtml(g.answers[i] || "—")}</span>` +
+                 `<span class="gmark ${ok ? "ok" : "ng"}">${ok ? "✓" : "✗"}</span>`;
+      }
+      row.innerHTML = inner;
+      if (g.stage !== "answer") row.addEventListener("click", () => { g.sel = i; render(); });
+      list.appendChild(row);
+    });
+    stage.appendChild(list);
+
+    // 아래: 카드 또는 안내
+    if (g.stage === "study") {
+      if (g.showCards) {
+        const cards = document.createElement("div");
+        cards.className = "gcards";
+        fillCards(cards, chunk(g.problems[g.sel]));
+        stage.appendChild(cards);
+      } else {
+        stage.insertAdjacentHTML("beforeend",
+          '<div class="gmsg"><b>숫자만 보고 외우세요</b>카드 없이 머릿속으로 그림을 떠올리는 연습<br>다 외웠으면 ⏎</div>');
+      }
+      display.innerHTML = '<span class="ph">외운 뒤 ⏎ 를 누르세요</span>';
+    } else if (g.stage === "answer") {
+      stage.insertAdjacentHTML("beforeend",
+        `<div class="gmsg"><b>${g.sel + 1}번 숫자를 입력하세요</b>카드 없이 기억만으로<br>다 쳤으면 ⏎</div>`);
+      display.innerHTML = digits ? groupedHtml(digits) : `<span class="ph">${g.sel + 1}번 답</span>`;
+    } else {
+      const score = g.problems.filter((p, i) => g.answers[i] === p).length;
+      const cards = document.createElement("div");
+      cards.className = "gcards";
+      fillCards(cards, chunk(g.problems[g.sel]));
+      stage.appendChild(cards);
+      display.innerHTML = `<span class="score-inline">${score} / 3</span><span class="ph">&nbsp; ⏎ 새 문제</span>`;
+    }
+  }
+
+  function gamePress(key) {
+    const g = game;
+    if (key === "clear") { tap(20); newGame(); return; }
+
+    if (g.stage === "study") {
+      if (key === "enter") { g.stage = "answer"; g.sel = 0; digits = ""; tap(16); }
+      else { tap(30); return; }
+    } else if (g.stage === "answer") {
+      if (key === "back") { if (!digits) return; digits = digits.slice(0, -1); tap(8); }
+      else if (key === "enter") {
+        if (!digits) { tap(30); return; }
+        g.answers[g.sel] = digits;
+        digits = "";
+        g.sel++;
+        if (g.sel >= 3) { g.stage = "result"; g.sel = 0; }
+        tap(16);
+      } else {
+        if (digits.length >= MAX_DIGITS) { tap(30); return; }
+        digits += key; tap(8);
+      }
+    } else {
+      if (key === "enter") { tap(16); newGame(); return; }
+      tap(30); return;
+    }
+    syncPad();
+    render();
   }
 
   /* ── 크게 보기 ────────────────────────────────────── */
@@ -342,6 +515,7 @@
   const tap = (ms) => { if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} } };
 
   function press(key) {
+    if (game) return gamePress(key);
     if (key === "back") {
       if (!digits) return;
       digits = digits.slice(0, -1);
@@ -370,12 +544,20 @@
   }
 
   function syncPad() {
+    const nums = pad.querySelectorAll("button[data-num]");
+    const back = pad.querySelector('[data-key="back"]');
+    if (game) {
+      const typing = game.stage === "answer";
+      nums.forEach((b) => { b.disabled = !typing || digits.length >= MAX_DIGITS; });
+      back.disabled = !typing || !digits;
+      resetBtn.disabled = false;                             // 게임에서는 ↻ = 새 문제
+      return;
+    }
     const full = digits.length >= MAX_DIGITS;
-    pad.querySelectorAll("button[data-num]").forEach((b) => { b.disabled = full; });
-    pad.querySelector('[data-key="back"]').disabled = !digits;
+    nums.forEach((b) => { b.disabled = full; });
+    back.disabled = !digits;
     resetBtn.disabled = !digits;
   }
-
   resetBtn.addEventListener("click", () => press("clear"));
 
   /* ── 키패드 ───────────────────────────────────────── */
@@ -406,17 +588,34 @@
     }
   }
 
-  /* ── 모드 ─────────────────────────────────────────── */
-  function syncMode() {
+  /* ── 헤더 버튼 ────────────────────────────────────── */
+  function syncHeader() {
     modeBtn.textContent = quiz ? "퀴즈" : "즉시";
     modeBtn.setAttribute("aria-pressed", String(quiz));
     modeBtn.title = quiz ? "숫자를 다 누르고 ⏎ 를 눌러야 그림이 열립니다" : "누르는 대로 바로 그림이 열립니다";
+    modeBtn.hidden = !!game;
+    gameBtn.setAttribute("aria-pressed", String(!!game));
+    gameBtn.title = game ? "게임 끝내기" : "무작위 숫자 3개 외우기";
+    gameOpt.hidden = !(game && game.stage === "study");
+    if (game) {
+      gameOpt.textContent = game.showCards ? "카드" : "숫자만";
+      gameOpt.setAttribute("aria-pressed", String(game.showCards));
+      gameOpt.title = game.showCards ? "카드를 보며 외웁니다 (누르면 숫자만)" : "숫자만 보고 외웁니다 (누르면 카드)";
+    }
   }
   modeBtn.addEventListener("click", () => {
     quiz = !quiz;
     localStorage.setItem("peg.quiz", quiz ? "1" : "0");
     revealed.clear();
-    syncMode();
+    syncHeader();
+    render();
+  });
+  gameBtn.addEventListener("click", () => { game ? endGame() : newGame(); });
+  gameOpt.addEventListener("click", () => {
+    if (!game) return;
+    game.showCards = !game.showCards;
+    localStorage.setItem("peg.gamecards", game.showCards ? "1" : "0");
+    syncHeader();
     render();
   });
 
@@ -430,7 +629,7 @@
   });
 
   /* ── 페그 목록 불러오기 ───────────────────────────── */
-  syncMode();
+  syncHeader();
   stage.innerHTML = '<div id="hint"><div class="big">페그 목록을 불러오는 중…</div></div>';
   try {
     const res = await fetch(PEGS_URL, { cache: "no-cache" });
@@ -438,6 +637,7 @@
     PEGS = await res.json();
   } catch (err) {
     pad.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+    gameBtn.disabled = true;
     stage.innerHTML =
       '<div id="hint">' +
         '<div class="big">페그 목록을 불러오지 못했습니다</div>' +
