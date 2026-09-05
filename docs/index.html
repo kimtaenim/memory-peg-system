@@ -688,7 +688,7 @@
       ticker.innerHTML = `<div class="tk" style="animation-duration:${8 + o.level * 1.6}s">${escapeHtml(pegsText)}</div>`;
       stage.appendChild(ticker);
       if (o.level <= 12) stage.insertAdjacentHTML("beforeend",
-        `<div class="gmsg"><b>사물 ${o.level}개를 순서대로 외우세요</b>01 곰인형, 02 영의정… 순번 페그에 엮어 보세요<br>다 외웠으면 ⏎</div>`);
+        `<div class="gmsg"><b>사물 ${o.level}개를 순서대로 외우세요</b>순번 페그에 하나씩 엮어 보세요 · 다 외웠으면 ⏎</div>`);
       stage.appendChild(levelRow({
         label: `${o.level}개`,
         prev: o.level > 3 ? () => newObj(o.level - 1) : null,
