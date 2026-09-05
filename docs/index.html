@@ -220,6 +220,15 @@
   #pad button.enter:active { background: #cba54f; }
   #pad button:disabled { opacity: .35; }
 
+  /* 레벨 조절 줄 (두 게임의 외우기 단계) */
+  .lvl { flex: 0 0 auto; display: flex; justify-content: center; gap: 6px; padding: 2px 0 4px; }
+  .lvl button {
+    appearance: none; border: 1px solid var(--edge); background: var(--panel); color: var(--ink);
+    border-radius: 999px; padding: 6px 12px; font: inherit; font-size: clamp(12px, 3.3vw, 14px); font-weight: 700; cursor: pointer;
+  }
+  .lvl button:disabled { opacity: .3; }
+  .lvl button.cur { color: var(--gold); border-color: var(--gold); }
+
   /* ── 사물 게임 ────────────────────────────────────── */
   .oseq { flex: 0 1 auto; display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 6px 4px; padding: 6px 0; }
   .ocell { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 6px; border-radius: 12px; border: 2px solid transparent; }
@@ -428,18 +437,20 @@
   }
 
   /* ── 게임 ─────────────────────────────────────────── */
-  function randomNumber() {
-    const n = 3 + Math.floor(Math.random() * 3);          // 3~5자리
+  function randomNumber(len) {
+    const n = len || 3 + Math.floor(Math.random() * 3);   // 지정 없으면 3~5자리
     let s = String(1 + Math.floor(Math.random() * 9));     // 첫 자리는 0 제외
     while (s.length < n) s += String(Math.floor(Math.random() * 10));
     return s;
   }
 
-  function newGame() {
+  function newGame(len) {
+    if (len === undefined) len = game ? game.len : 0;      // 0 = 무작위 3~5자리, 3~6 = 고정
     game = {
       stage: "study",                                       // study → answer → result
       showCards: localStorage.getItem("peg.gamecards") !== "0",
-      problems: [randomNumber(), randomNumber(), randomNumber()],
+      len,
+      problems: [randomNumber(len), randomNumber(len), randomNumber(len)],
       answers: ["", "", ""],
       sel: 0,
     };
@@ -495,6 +506,13 @@
 
     // 아래: 카드 또는 안내
     if (g.stage === "study") {
+      stage.appendChild(levelRow({
+        label: g.len ? `${g.len}자리` : "무작위 3~5자리",
+        prev: g.len > 3 ? () => newGame(g.len - 1) : (g.len === 0 ? () => newGame(5) : null),
+        reset: g.len ? () => newGame(0) : null,
+        next: g.len === 0 ? () => newGame(3) : (g.len < MAX_DIGITS ? () => newGame(g.len + 1) : null),
+        resetLabel: "무작위",
+      }));
       if (g.showCards) {
         const cards = document.createElement("div");
         cards.className = "gcards";
@@ -545,6 +563,21 @@
     }
     syncPad();
     render();
+  }
+
+  /* 레벨 조절 줄: ◀ 이전 · 초기화 · 다음 ▶ */
+  function levelRow({ label, prev, reset, next, resetLabel = "처음부터" }) {
+    const row = document.createElement("div");
+    row.className = "lvl";
+    const mk = (text, fn, cls = "") => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = text; b.className = cls;
+      if (fn) b.addEventListener("click", () => { tap(10); fn(); }); else b.disabled = true;
+      return b;
+    };
+    row.append(mk("◀ 이전", prev), mk(label, null, "cur"), mk(resetLabel, reset), mk("다음 ▶", next));
+    row.querySelector(".cur").disabled = false;
+    return row;
   }
 
   /* ── 사물 게임: 무작위 이모지 n개를 순서대로 외우기 ── */
@@ -600,6 +633,13 @@
     if (o.stage === "study") {
       stage.insertAdjacentHTML("beforeend",
         `<div class="gmsg"><b>사물 ${o.level}개를 순서대로 외우세요</b>01 곰인형, 02 영의정… 순번 페그에 엮어 보세요<br>다 외웠으면 ⏎</div>`);
+      stage.appendChild(levelRow({
+        label: `${o.level}개`,
+        prev: o.level > 3 ? () => newObj(o.level - 1) : null,
+        reset: o.level > 3 ? () => newObj(3) : null,
+        next: o.level < PANEL ? () => newObj(o.level + 1) : null,
+        resetLabel: "3개부터",
+      }));
       display.innerHTML = `<span class="score-inline">${o.level}개</span><span class="ph">&nbsp; 외운 뒤 ⏎</span>`;
     } else if (o.stage === "play") {
       display.innerHTML = `<span class="score-inline">${o.picks.length} / ${o.level}</span><span class="ph">&nbsp; 순서대로 고르고 ⏎</span>`;
