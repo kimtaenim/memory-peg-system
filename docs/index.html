@@ -72,6 +72,13 @@
   /* ── 게임 ─────────────────────────────────────────── */
   #stage.game { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 8px; }
   .glist { flex: 0 0 auto; display: flex; flex-direction: column; gap: 5px; }
+  .glist.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .glist.cols2 .grow { padding: 4px 8px; gap: 6px; }
+  .glist.cols2 .grow .gn { font-size: clamp(17px, 5vw, 22px); letter-spacing: .04em; }
+  .glist.cols2 .grow .ga { font-size: clamp(12px, 3.4vw, 15px); }
+  .glist.cols2 .grow .gi { width: 18px; height: 18px; font-size: 11px; }
+  .grow .gn.done { color: var(--muted); }
+  .lvl button.len { color: var(--gold); }
   .grow {
     display: flex; align-items: center; gap: 10px;
     padding: 6px 10px; border-radius: 12px;
@@ -442,21 +449,26 @@
   }
 
   /* ── 게임 ─────────────────────────────────────────── */
+  const MAX_COUNT = 8;
+  const LEN_OPTS = [0, 3, 4, 5, 6];                        // 0 = 3~4자리 무작위
+  const lenLabel = (l) => l ? `${l}자리` : "3~4자리";
   function randomNumber(len) {
-    const n = len || 3 + Math.floor(Math.random() * 3);   // 지정 없으면 3~5자리
+    const n = len || 3 + Math.floor(Math.random() * 2);   // 지정 없으면 3~4자리
     let s = String(1 + Math.floor(Math.random() * 9));     // 첫 자리는 0 제외
     while (s.length < n) s += String(Math.floor(Math.random() * 10));
     return s;
   }
 
-  function newGame(len) {
-    if (len === undefined) len = game ? game.len : 0;      // 0 = 무작위 3~5자리, 3~6 = 고정
+  function newGame(count, len) {
+    if (count === undefined) count = game ? game.count : 3;
+    if (len === undefined) len = game ? game.len : 0;
+    count = Math.min(Math.max(3, count), MAX_COUNT);
     game = {
       stage: "study",                                       // study → answer → result
       showCards: localStorage.getItem("peg.gamecards") !== "0",
-      len,
-      problems: [randomNumber(len), randomNumber(len), randomNumber(len)],
-      answers: ["", "", ""],
+      count, len,
+      problems: Array.from({ length: count }, () => randomNumber(len)),
+      answers: Array(count).fill(""),
       sel: 0,
     };
     digits = "";
@@ -483,7 +495,7 @@
 
     // 위: 문제 목록
     const list = document.createElement("div");
-    list.className = "glist";
+    list.className = "glist" + (g.count > 4 ? " cols2" : "");
     g.problems.forEach((p, i) => {
       const row = document.createElement("div");
       row.className = "grow" + (i === g.sel ? " sel" : "");
@@ -492,10 +504,10 @@
         inner += `<span class="gn">${groupedHtml(p)}</span>`;
       } else if (g.stage === "answer") {
         const a = g.answers[i];
-        inner += i < g.sel
-          ? `<span class="gn">${groupedHtml(a)}</span>`
-          : i === g.sel
-            ? `<span class="gn">${digits ? groupedHtml(digits) : '<span class="ph">키패드로 입력</span>'}<span class="caret"></span></span>`
+        inner += i === g.sel
+          ? `<span class="gn">${digits ? groupedHtml(digits) : '<span class="ph">키패드로 입력</span>'}<span class="caret"></span></span>`
+          : a
+            ? `<span class="gn done">${groupedHtml(a)}</span>`
             : `<span class="gn"><span class="ph">${"·".repeat(p.length)}</span></span>`;
       } else {
         const ok = g.answers[i] === p;
@@ -505,19 +517,29 @@
       }
       row.innerHTML = inner;
       if (g.stage !== "answer") row.addEventListener("click", () => { g.sel = i; render(); });
+      else row.addEventListener("click", () => {                       // 답한 줄을 눌러 고치기
+        if (i === g.sel) return;
+        g.answers[g.sel] = digits; g.sel = i; digits = g.answers[i]; tap(8); syncPad(); render();
+      });
       list.appendChild(row);
     });
     stage.appendChild(list);
 
     // 아래: 카드 또는 안내
     if (g.stage === "study") {
-      stage.appendChild(levelRow({
-        label: g.len ? `${g.len}자리` : "무작위 3~5자리",
-        prev: g.len > 3 ? () => newGame(g.len - 1) : (g.len === 0 ? () => newGame(5) : null),
-        reset: g.len ? () => newGame(0) : null,
-        next: g.len === 0 ? () => newGame(3) : (g.len < MAX_DIGITS ? () => newGame(g.len + 1) : null),
-        resetLabel: "무작위",
-      }));
+      const row = levelRow({
+        label: `${g.count}개`,
+        prev: g.count > 3 ? () => newGame(g.count - 1) : null,
+        reset: g.count > 3 ? () => newGame(3) : null,
+        next: g.count < MAX_COUNT ? () => newGame(g.count + 1) : null,
+        resetLabel: "3개부터",
+      });
+      const lenBtn = document.createElement("button");                 // 자릿수: 누를 때마다 순환
+      lenBtn.type = "button"; lenBtn.className = "len"; lenBtn.textContent = lenLabel(g.len);
+      lenBtn.title = "자릿수 바꾸기";
+      lenBtn.addEventListener("click", () => { tap(10); newGame(g.count, LEN_OPTS[(LEN_OPTS.indexOf(g.len) + 1) % LEN_OPTS.length]); });
+      row.appendChild(lenBtn);
+      stage.appendChild(row);
       if (g.showCards) {
         const cards = document.createElement("div");
         cards.className = "gcards";
@@ -531,7 +553,7 @@
     } else if (g.stage === "answer") {
       stage.insertAdjacentHTML("beforeend",
         `<div class="gmsg"><b>${g.sel + 1}번 숫자를 키패드로 치세요</b>` +
-        `기억나는 숫자를 그대로 치고 ⏎ 로 제출 → 다음 번호로<br>⌫ 로 고치고, 모르면 아는 데까지만 쳐도 됩니다</div>`);
+        `치고 ⏎ → 다음 번호. 틀린 줄은 눌러서 다시 입력<br>빈 줄에서 ⌫ 는 이전 줄로</div>`);
       display.innerHTML = (digits ? groupedHtml(digits) : `<span class="ph">${g.sel + 1}번 답</span>`) + '<span class="caret"></span>';
     } else {
       const score = g.problems.filter((p, i) => g.answers[i] === p).length;
@@ -539,7 +561,9 @@
       cards.className = "gcards";
       fillCards(cards, chunk(g.problems[g.sel]));
       stage.appendChild(cards);
-      display.innerHTML = `<span class="score-inline">${score} / 3</span><span class="ph">&nbsp; ⏎ 새 문제</span>`;
+      const perfect = score === g.count;
+      display.innerHTML = `<span class="score-inline">${score} / ${g.count}</span>` +
+        `<span class="ph">&nbsp; ⏎ ${perfect ? (g.count < MAX_COUNT ? `다음 ${g.count + 1}개` : "최고 단계!") : `${g.count}개 다시`}</span>`;
     }
   }
 
@@ -551,20 +575,29 @@
       if (key === "enter") { g.stage = "answer"; g.sel = 0; digits = ""; tap(16); }
       else { tap(30); display.innerHTML = '<span class="ph">먼저 ⏎ 를 눌러야 입력할 수 있어요</span>'; return; }
     } else if (g.stage === "answer") {
-      if (key === "back") { if (!digits) return; digits = digits.slice(0, -1); tap(8); }
+      if (key === "back") {
+        if (digits) { digits = digits.slice(0, -1); tap(8); }
+        else if (g.sel > 0) { g.answers[g.sel] = ""; g.sel--; digits = g.answers[g.sel]; tap(8); }   // 빈 줄에서 ⌫ = 이전 줄로
+        else return;
+      }
       else if (key === "enter") {
         if (!digits) { tap(30); return; }
         g.answers[g.sel] = digits;
         digits = "";
-        g.sel++;
-        if (g.sel >= 3) { g.stage = "result"; g.sel = 0; }
+        let next = -1;                                                   // 다음 빈 줄 (뒤에서 찾고, 없으면 앞에서)
+        for (let k = 1; k <= g.count; k++) { const j = (g.sel + k) % g.count; if (!g.answers[j]) { next = j; break; } }
+        if (next < 0) { g.stage = "result"; g.sel = 0; }
+        else g.sel = next;
         tap(16);
       } else {
         if (digits.length >= MAX_DIGITS) { tap(30); return; }
         digits += key; tap(8);
       }
     } else {
-      if (key === "enter") { tap(16); newGame(); return; }
+      if (key === "enter") {
+        const score = g.problems.filter((p, i) => g.answers[i] === p).length;
+        tap(16); newGame(score === g.count ? g.count + 1 : g.count); return;
+      }
       tap(30); return;
     }
     syncPad();
