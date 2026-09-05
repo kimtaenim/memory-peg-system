@@ -495,6 +495,23 @@
     return s;
   }
 
+  /* 진행 중인 문제를 저장해 두고, 나갔다 와도 ↻ 나 "L1부터"를 누르기 전엔 같은 숫자를 이어간다 */
+  function saveGame() {
+    if (game) localStorage.setItem("peg.game", JSON.stringify({ level: game.level, problems: game.problems }));
+  }
+  function resumeGame() {
+    try {
+      const d = JSON.parse(localStorage.getItem("peg.game") || "null");
+      if (!d || !LADDER[d.level - 1] || !Array.isArray(d.problems)) return false;
+      const lens = LADDER[d.level - 1];
+      if (d.problems.length !== lens.length || !d.problems.every((n, i) => /^[1-9]\d*$/.test(n) && n.length === lens[i])) return false;
+      game = { stage: "study", level: d.level, count: lens.length, problems: d.problems, answers: Array(lens.length).fill(""), sel: 0 };
+      localStorage.setItem("peg.level1", String(d.level));
+      digits = ""; syncHeader(); syncPad(); render();
+      return true;
+    } catch { return false; }
+  }
+
   function newGame(level) {
     if (level === undefined) level = game ? game.level : Number(localStorage.getItem("peg.level1") || 1);
     level = Math.min(Math.max(1, level), LADDER.length);
@@ -508,6 +525,7 @@
       answers: Array(count).fill(""),
       sel: 0,
     };
+    saveGame();
     digits = "";
     syncHeader();
     syncPad();
@@ -916,7 +934,7 @@
   };
   document.getElementById("homebtn").addEventListener("click", goHome);
   document.getElementById("home2").addEventListener("click", goHome);
-  gameBtn.addEventListener("click", () => { if (obj) { obj = null; buildPad(); } game ? endGame() : newGame(); });
+  gameBtn.addEventListener("click", () => { if (obj) { obj = null; buildPad(); } if (game) return endGame(); if (!resumeGame()) newGame(); });
   objBtn.addEventListener("click", () => { if (obj) return endObj(); game = null; if (!resumeObj()) newObj(); });
 
   /* 물리 키보드 (데스크톱) */
