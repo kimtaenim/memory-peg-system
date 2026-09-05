@@ -341,7 +341,6 @@
   <header>
     <button id="homebtn" class="brand" type="button" title="첫 화면(숫자 페그)으로"><span class="back">◀ </span><b>숫자 페그</b><span class="sub"> · 모양(0–9) · 소리(00–99)</span></button>
     <div class="hbtns">
-      <button id="gameopt" type="button" aria-pressed="true" hidden>카드</button>
       <button id="mode" type="button" aria-pressed="false">즉시</button>
       <button id="gamebtn" type="button" aria-pressed="false">게임1</button>
       <button id="objbtn" type="button" aria-pressed="false">게임2</button>
@@ -374,7 +373,6 @@
   const pad = document.getElementById("pad");
   const modeBtn = document.getElementById("mode");
   const gameBtn = document.getElementById("gamebtn");
-  const gameOpt = document.getElementById("gameopt");
 
   let digits = "";
   let quiz = localStorage.getItem("peg.quiz") === "1";
@@ -502,7 +500,6 @@
     const count = lens.length;
     game = {
       stage: "study",                                       // study → answer → result
-      showCards: localStorage.getItem("peg.gamecards") !== "0",
       level, count,
       problems: (() => { const out = []; for (const len of lens) { let n; do n = randomNumber(len); while (out.includes(n)); out.push(n); } return out; })(),
       answers: Array(count).fill(""),
@@ -571,15 +568,10 @@
         next: g.level < LADDER.length ? () => newGame(g.level + 1) : null,
         resetLabel: "L1부터",
       }));
-      if (g.showCards) {
-        const cards = document.createElement("div");
-        cards.className = "gcards";
-        fillCards(cards, chunk(g.problems[g.sel]));
-        stage.appendChild(cards);
-      } else {
-        stage.insertAdjacentHTML("beforeend",
-          '<div class="gmsg"><b>숫자만 보고 외우세요</b>카드 없이 머릿속으로 그림을 떠올리는 연습<br>다 외웠으면 ⏎</div>');
-      }
+      const cards = document.createElement("div");                 // 늘 카드와 함께 외운다
+      cards.className = "gcards";
+      fillCards(cards, chunk(g.problems[g.sel]));
+      stage.appendChild(cards);
       display.innerHTML = '<span class="ph">외웠으면 ⏎ → 입력 시작</span>';
     } else if (g.stage === "answer") {
       stage.insertAdjacentHTML("beforeend",
@@ -890,12 +882,6 @@
     modeBtn.hidden = !!(game || obj);
     gameBtn.setAttribute("aria-pressed", String(!!game));
     gameBtn.title = game ? "게임1 끝내기" : "게임1: 숫자 외우기 (3자리 하나부터 5자리 넷까지)";
-    gameOpt.hidden = !(game && game.stage === "study");
-    if (game) {
-      gameOpt.textContent = game.showCards ? "카드" : "숫자만";
-      gameOpt.setAttribute("aria-pressed", String(game.showCards));
-      gameOpt.title = game.showCards ? "카드를 보며 외웁니다 (누르면 숫자만)" : "숫자만 보고 외웁니다 (누르면 카드)";
-    }
   }
   modeBtn.addEventListener("click", () => {
     quiz = !quiz;
@@ -912,13 +898,6 @@
   document.getElementById("home2").addEventListener("click", goHome);
   gameBtn.addEventListener("click", () => { if (obj) { obj = null; buildPad(); } game ? endGame() : newGame(); });
   objBtn.addEventListener("click", () => { if (obj) return endObj(); game = null; newObj(); });
-  gameOpt.addEventListener("click", () => {
-    if (!game) return;
-    game.showCards = !game.showCards;
-    localStorage.setItem("peg.gamecards", game.showCards ? "1" : "0");
-    syncHeader();
-    render();
-  });
 
   /* 물리 키보드 (데스크톱) */
   addEventListener("keydown", (e) => {
