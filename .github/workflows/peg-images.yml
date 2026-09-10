@@ -32,6 +32,11 @@ on:
         type: boolean
         required: false
         default: false
+      edit:
+        description: '편집 모드: 새로 그리지 않고 참조 그림(tools/refs)을 prompts.json 의 edit 지시대로 고침 (only 필수)'
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: peg-images
@@ -62,6 +67,7 @@ jobs:
           SIZE: ${{ inputs.size }}
           MODEL: ${{ inputs.model }}
           FORCE: ${{ inputs.force }}
+          EDIT: ${{ inputs.edit }}
         run: |
           if [ -z "$OPENAI_API_KEY" ]; then
             echo "::error::OPENAI_API_KEY 시크릿이 없습니다. Settings → Secrets and variables → Actions 에서 등록하세요."
@@ -70,6 +76,13 @@ jobs:
           args=(--model "$MODEL" --quality "$QUALITY" --size "$SIZE")
           [ -n "$ONLY" ] && args+=(--only "$ONLY")
           [ "$FORCE" = "true" ] && args+=(--force)
+          if [ "$EDIT" = "true" ]; then
+            if [ -z "$ONLY" ]; then
+              echo "::error::편집 모드는 only 에 고칠 키를 적어야 합니다 (예: 3)."
+              exit 1
+            fi
+            args+=(--edit)
+          fi
           node tools/gen-peg-images.mjs "${args[@]}"
 
       - name: Commit & push

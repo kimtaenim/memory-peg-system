@@ -18,7 +18,14 @@
       "prompt": "A white swan gliding on black water, its neck and breast bent into exactly the curve of the digit 2, a small crown floating above its head"
     },
     "3": {
-      "prompt": "A light-hearted, comical beach-style scene: a slim handsome young man lying on his side on a long low stone ledge, back turned to the viewer, wearing only bright red polka-dot swim shorts (red with white dots), like a swimmer resting by a pool. The whole figure fits inside the picture with room to spare: head, back, both legs stretched out along the ledge, and both feet are fully visible, nothing cropped. The camera is at ledge height looking at his back. The red polka-dot swim shorts are the biggest shape in the picture, and their outline reads as one big upright number 3: two round bumps stacked one above the other with a notch between them. The legs are clearly separate from the shorts, not folded into them. He looks back over his shoulder with a cheeky grin. No numerals drawn anywhere."
+      "prompt": "A light-hearted, comical beach-style scene: a slim handsome young man lying on his side on a long low stone ledge, back turned to the viewer, wearing only bright red polka-dot swim shorts (red with white dots), like a swimmer resting by a pool. The whole figure fits inside the picture with room to spare: head, back, both legs stretched out along the ledge, and both feet are fully visible, nothing cropped. The camera is at ledge height looking at his back. The red polka-dot swim shorts are the biggest shape in the picture, and their outline reads as one big upright number 3: two round bumps stacked one above the other with a notch between them. The legs are clearly separate from the shorts, not folded into them. He looks back over his shoulder with a cheeky grin. No numerals drawn anywhere.",
+      "edit": "Redraw only the red polka-dot swim shorts so that their outline is unmistakably a big bold upright number 3, as if the shorts themselves were cut in the shape of the digit: two large round lobes stacked one above the other bulging out to the right, a deep notch between them in the middle, and a nearly straight edge on the left where they meet the waist. Keep them red with white polka dots in the same ink-outlined storybook style. Do not draw a numeral on the shorts",
+      "editMask": {
+        "x": 0.44,
+        "y": 0.39,
+        "w": 0.34,
+        "h": 0.23
+      }
     },
     "4": {
       "prompt": "A small yacht whose triangular sail and straight mast together form the digit 4, crossing a black sea, a pale hand rising from the waves to steady the mast"

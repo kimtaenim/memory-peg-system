@@ -122,12 +122,33 @@ tools/gen-peg-images.mjs  일괄 생성기 — 위 두 JSON 만 읽는다 (Node 
 
 - **키워드**: `docs/data/pegs.json` — 고치면 웹앱에 바로 반영된다 (그림 재생성 불필요)
 - **그림 내용**: `docs/data/prompts.json` 의 `items` → `--only <키> --force`
+- **마음에 드는 그림의 한 부분만**: 편집 모드. 새로 그리지 않고 참조 그림을 고친다 (아래 참고)
 - **덱 전체의 화풍**: `docs/data/prompts.json` 의 `style.base` 한 곳 — 여기만 고치면 110장 인상이 통째로 바뀐다
 - **자릿수 상한**: `docs/index.html` 의 `MAX_DIGITS`
 - **색**: `docs/index.html` 맨 위 `:root` 변수
 
 웹앱이 JSON 을 `fetch` 하므로 `index.html` 을 더블클릭해서 열면 브라우저가 막는다.
 로컬에서 볼 때는 `npx http-server docs` 처럼 간단한 서버로 열 것. Pages 에서는 그냥 된다.
+
+### 편집 모드 — 그림은 살리고 한 곳만 고치기
+
+새로 뽑으면 그림 전체가 바뀐다. 얼굴·자세는 마음에 드는데 소품 하나만 아쉬울 때는
+OpenAI 의 `images/edits` 로 참조 그림을 넣고 그 부분만 다시 그리게 한다.
+
+1. 살릴 그림을 `tools/refs/<키>.webp` 에 둔다 (없으면 현재 카드 `docs/img/<자릿수>/<키>.webp` 를 참조로 쓴다)
+2. `docs/data/prompts.json` 의 항목에 적는다:
+   ```jsonc
+   "3": {
+     "prompt": "...",                                  // 새로 뽑을 때 쓰는 원래 장면 (그대로 둔다)
+     "edit": "Redraw only the red swim shorts so ...", // 무엇을 어떻게 고칠지
+     "editMask": { "x": 0.44, "y": 0.39, "w": 0.34, "h": 0.23 } // 다시 그릴 영역 (카드 폭·높이 비율). 빼면 전체를 참조로 고친다
+   }
+   ```
+   `edit` 에는 덱 공통 화풍이 붙지 않는다 — 화풍은 참조 그림이 들고 있다. 마스크 바깥은 원본 픽셀이 그대로 남는다.
+3. 돌린다: Actions → peg-images → `only` 에 키, **edit ✓** (로컬은 `node tools/gen-peg-images.mjs --edit --only 3`).
+   `--dry-run` 을 붙이면 마스크가 어디 잡혔는지 PNG 로 떨어뜨려 준다.
+
+결과는 기존 카드를 덮어쓴다. 참조 그림은 `tools/refs` 에 남으니 마음에 안 들면 지시만 고쳐 다시 돌리면 된다.
 
 ## 페그 규칙
 
