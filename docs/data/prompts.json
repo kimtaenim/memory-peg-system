@@ -187,7 +187,7 @@
       "prompt": "One long cucumber lying on a cloth, a single slice standing on its edge like a coin, the seeds arranged as a small mandala"
     },
     "53": {
-      "prompt": "A jade royal seal with a carved dragon knob resting on a red ink pad, a decree half stamped beneath it, two hands hovering above"
+      "prompt": "A sizzling iron plate of osam-bulgogi — Korean spicy stir-fry of squid and pork belly: one whole squid coiled with its tentacles spread, tangled with thick slices of pork belly, all glazed in fiery red chili paste sauce with onions and scallions, steam rising in curls. The dish fills the front of the card, enormous and glistening; behind it a languid figure leans in with chopsticks and a hungry sidelong look"
     },
     "54": {
       "prompt": "An enormous gentle grey super-pig with drooping ears lying down, a small girl asleep against its flank, mountains behind them",
@@ -233,7 +233,8 @@
       "prompt": "A skyline of towers with a crowned torch-bearing colossus rising among them, a yellow cab below, steam curling up from the street"
     },
     "67": {
-      "prompt": "A field of yellow canola flowers rolling to the horizon, one figure walking a narrow path through it, petals blowing upward like sparks"
+      "prompt": "A grim, dreadful scene of yuksi (戮屍), the old posthumous execution: in a ruined courtyard a shrouded body lies bound on a wooden scaffold, two masked executioners in black stand over it, one raising a great broad axe, an official in dark robes reading a sentence from a scroll, a broken coffin lid on the ground, crows circling above, the crowd of onlookers in the shadows turning their faces away. The horror is in the shadows and the faces; no blood, no wounds, the body stays covered",
+      "solemn": true
     },
     "68": {
       "prompt": "A bald bespectacled scholar cradling an enormous history book, tiny hunters, farmers and machines marching out of its open pages"
