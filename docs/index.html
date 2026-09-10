@@ -402,7 +402,7 @@
   }
 
   // ?v= 는 브라우저 메모리 캐시를 한 번 비우는 용도. 서비스 워커는 쿼리를 떼고 캐시하므로 값은 아무거나 된다.
-  const IMG_VER = 2;
+  const IMG_VER = 3;
   const imgSrc = (key) => `img/${key.length}/${key}.webp?v=${IMG_VER}`;
 
   const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) =>

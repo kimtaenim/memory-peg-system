@@ -5,7 +5,7 @@
  *    캐시를 갈아끼운 뒤 화면에 알려서 그 자리에서 새 그림으로 바뀌게 한다 (다시 뽑은 카드가 바로 보이게)
  *  - 그 외 같은 출처 파일: 캐시 우선
  */
-const CACHE = "peg-v2";
+const CACHE = "peg-v3";
 const SHELL = ["./", "./index.html", "./data/pegs.json", "./data/emoji.json", "./manifest.webmanifest", "./favicon.svg", "./icon-192.png"];
 
 self.addEventListener("install", (e) => {
@@ -63,7 +63,8 @@ self.addEventListener("fetch", (e) => {
     // 네트워크 우선, 실패하면 캐시
     e.respondWith(caches.open(CACHE).then(async (c) => {
       try {
-        const res = await fetch(req);
+        // 브라우저 HTTP 캐시(Pages 는 10분)를 건너뛰고 서버에 직접 확인한다 — 고친 앱이 바로 뜨게
+        const res = await fetch(new Request(req.url, { cache: "no-cache" }));
         if (res.ok) c.put(req, res.clone());
         return res;
       } catch {
