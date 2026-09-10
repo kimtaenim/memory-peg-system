@@ -1025,6 +1025,14 @@
   /* ── 서비스 워커: 한 번 본 카드는 폰에 저장해 다음부터 즉시 뜨게 (미리 받기는 안 함) ── */
   if ("serviceWorker" in navigator) {
     try { await navigator.serviceWorker.register("sw.js"); } catch (e) { /* 지원 안 하면 그냥 온라인으로 */ }
+    // 서비스 워커가 뒤에서 새 그림을 받아오면, 이미 떠 있는 옛 그림을 그 자리에서 바꾼다
+    navigator.serviceWorker.addEventListener("message", (e) => {
+      if (e.data?.type !== "img-updated") return;
+      for (const img of document.querySelectorAll("img")) {
+        if (img.src.split("?")[0] === e.data.url) img.src = e.data.url + "?v=" + Date.now();
+      }
+    });
+    navigator.serviceWorker.startMessages?.();   // addEventListener 만으로는 큐에 쌓인 메시지가 안 풀리는 브라우저가 있다
   }
 })();
 </script>
