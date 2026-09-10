@@ -109,6 +109,31 @@
   .grow .gmark { flex: 0 0 auto; font-size: 18px; font-weight: 900; }
   .grow .gmark.ok { color: #6fd39a; } .grow .gmark.ng { color: #ff7a7a; }
   .gcards .card { max-height: 100%; }
+  /* 카드가 4~5장이면 두 줄로 (세 장씩) */
+  .gcards.many { flex-wrap: wrap; align-content: center; }
+  .gcards.many .card { flex: 0 0 calc((100% - 2 * var(--gap)) / 3); max-height: calc(50% - var(--gap) / 2); }
+  .gcards.many .card .cap { flex-direction: column; align-items: center; gap: 0; padding: 3px 4px 5px; }
+  .gcards.many .card .num { font-size: clamp(12px, 3.6vw, 17px); line-height: 1.1; }
+  .gcards.many .card .label { font-size: clamp(11px, 3.2vw, 15px); line-height: 1.2; text-align: center;
+    white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  /* 게임1 위쪽 숫자 줄 */
+  .gnum { flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25em .4em;
+    font-size: clamp(22px, 7vw, 34px); font-weight: 900; letter-spacing: .06em; font-variant-numeric: tabular-nums; padding: 2px 0; }
+  .gnum .grp:nth-child(even) { color: var(--gold); }
+  .gnum .ph { color: #4d4488; }
+  .gnum .ok { color: #6fd39a; } .gnum .ng { color: #ff7a7a; }
+  .gnum .gmark { font-size: .8em; margin-left: .2em; }
+  .gnum .gmark.ok { color: #6fd39a; } .gnum .gmark.ng { color: #ff7a7a; }
+  .gnum.ans { font-size: clamp(18px, 5.6vw, 28px); margin-top: -6px; }
+  .gdesc { flex: 0 0 auto; text-align: center; color: var(--muted); font-size: clamp(12px, 3.4vw, 15px); font-weight: 700;
+    line-height: 1.5; padding: 0 var(--gap) 2px; }
+  .gdesc b { color: var(--gold); font-variant-numeric: tabular-nums; margin-right: .25em; }
+  .gdesc .dot { color: #4d4488; }
+  #display .score-inline.ng { color: #ff7a7a; }
+  #display { overflow: hidden; white-space: nowrap; }
+  #display.long { font-size: clamp(17px, 5.4vw, 28px); letter-spacing: .01em; gap: .2em; }
+  /* 축하 색종이 */
+  .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
   .gcards { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; gap: var(--gap); }
   .gmsg { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
     text-align: center; color: var(--muted); font-size: clamp(13px, 3.6vw, 16px); line-height: 1.6; }
@@ -461,6 +486,7 @@
     if (obj) return renderObj();
     if (game) return renderGame();
     stage.classList.remove("game", "obj");
+    display.classList.remove("long");
     const chunks = chunk(digits);
 
     display.innerHTML = chunks.length ? groupedHtml(digits) : '<span class="ph">숫자를 누르세요</span>';
@@ -488,33 +514,25 @@
     });
   }
 
-  /* ── 게임 ─────────────────────────────────────────── */
-  /* 레벨 사다리: 각 레벨에서 외울 숫자들의 자릿수 */
-  const LADDER = [
-    [4], [5], [6],                                             // 하나: 네 자리부터
-    [3,4], [4,4], [4,5], [5,5],                                // 둘: 세 자리 + 네 자리부터
-    [3,4,4], [4,4,4], [4,4,5], [4,5,5],                        // 셋: 세 자리 하나 + 네 자리 둘부터
-    [3,4,4,4], [4,4,4,4], [4,4,5,5], [4,5,5,5], [5,5,5,5],     // 넷
-  ];
-  const ladderLabel = (lv) => `L${lv} · ${LADDER[lv - 1].join("+")}자리`;
+  /* ── 게임1: 무작위 숫자 하나 외우기 (6자리 → 10자리) ── */
+  const LADDER = [6, 7, 8, 9, 10];                              // 레벨별 자릿수
+  const ladderLabel = (lv) => `L${lv} · ${LADDER[lv - 1]}자리`;
   function randomNumber(len) {
-    const n = len;
-    let s = String(1 + Math.floor(Math.random() * 9));     // 첫 자리는 0 제외
-    while (s.length < n) s += String(Math.floor(Math.random() * 10));
+    let s = String(1 + Math.floor(Math.random() * 9));          // 첫 자리는 0 제외
+    while (s.length < len) s += String(Math.floor(Math.random() * 10));
     return s;
   }
 
   /* 진행 중인 문제를 저장해 두고, 나갔다 와도 ↻ 나 "L1부터"를 누르기 전엔 같은 숫자를 이어간다 */
   function saveGame() {
-    if (game) localStorage.setItem("peg.game", JSON.stringify({ level: game.level, problems: game.problems }));
+    if (game) localStorage.setItem("peg.game", JSON.stringify({ level: game.level, number: game.number }));
   }
   function resumeGame() {
     try {
       const d = JSON.parse(localStorage.getItem("peg.game") || "null");
-      if (!d || !LADDER[d.level - 1] || !Array.isArray(d.problems)) return false;
-      const lens = LADDER[d.level - 1];
-      if (d.problems.length !== lens.length || !d.problems.every((n, i) => /^[1-9]\d*$/.test(n) && n.length === lens[i])) return false;
-      game = { stage: "study", level: d.level, count: lens.length, problems: d.problems, answers: Array(lens.length).fill(""), sel: 0 };
+      if (!d || !LADDER[d.level - 1] || typeof d.number !== "string") return false;
+      if (!/^[1-9]\d*$/.test(d.number) || d.number.length !== LADDER[d.level - 1]) return false;
+      game = { stage: "study", level: d.level, number: d.number, answer: "" };
       localStorage.setItem("peg.level1", String(d.level));
       digits = ""; syncHeader(); syncPad(); render();
       return true;
@@ -525,15 +543,7 @@
     if (level === undefined) level = game ? game.level : Number(localStorage.getItem("peg.level1") || 1);
     level = Math.min(Math.max(1, level), LADDER.length);
     localStorage.setItem("peg.level1", String(level));
-    const lens = LADDER[level - 1];
-    const count = lens.length;
-    game = {
-      stage: "study",                                       // study → answer → result
-      level, count,
-      problems: (() => { const out = []; for (const len of lens) { let n; do n = randomNumber(len); while (out.includes(n)); out.push(n); } return out; })(),
-      answers: Array(count).fill(""),
-      sel: 0,
-    };
+    game = { stage: "study", level, number: randomNumber(LADDER[level - 1]), answer: "" };   // study → answer → result
     saveGame();
     digits = "";
     syncHeader();
@@ -551,46 +561,36 @@
     render();
   }
 
+  /* 답을 문제 자리마다 견줘서 맞은 자리는 초록, 틀린 자리는 빨강 (문제와 같은 묶음으로) */
+  function diffHtml(problem, answer) {
+    let pos = 0;
+    return chunk(problem).map((c) => {
+      const inner = [...c].map((ch) => { const a = answer[pos++]; return `<span class="${a === ch ? "ok" : "ng"}">${a ?? "·"}</span>`; }).join("");
+      return `<span class="grp">${inner}</span>`;
+    }).join("");
+  }
+
   function renderGame() {
     const g = game;
     stage.classList.add("game");
     stage.innerHTML = "";
     delete stage.dataset.n;
+    const keys = chunk(g.number);
+    display.classList.toggle("long", g.number.length >= 9);      // 9~10자리는 입력창 글자를 조금 줄인다
 
-    // 위: 문제 목록
-    const list = document.createElement("div");
-    list.className = "glist" + (g.count > 4 ? " cols2" : "");
-    g.problems.forEach((p, i) => {
-      const row = document.createElement("div");
-      row.className = "grow" + (i === g.sel ? " sel" : "");
-      let inner = `<span class="gi">${i + 1}</span>`;
-      if (g.stage === "study") {
-        inner += `<span class="gn">${groupedHtml(p)}</span>`;
-      } else if (g.stage === "answer") {
-        const a = g.answers[i];
-        inner += i === g.sel
-          ? `<span class="gn">${digits ? groupedHtml(digits) : '<span class="ph">키패드로 입력</span>'}<span class="caret"></span></span>`
-          : a
-            ? `<span class="gn done">${groupedHtml(a)}</span>`
-            : `<span class="gn"><span class="ph">${"·".repeat(p.length)}</span></span>`;
-      } else {
-        const ok = g.answers[i] === p;
-        inner += `<span class="gn">${groupedHtml(p)}</span>` +
-                 `<span class="ga ${ok ? "ok" : "ng"}">${escapeHtml(g.answers[i] || "—")}</span>` +
-                 `<span class="gmark ${ok ? "ok" : "ng"}">${ok ? "○" : "✗"}</span>`;
-      }
-      row.innerHTML = inner;
-      if (g.stage !== "answer") row.addEventListener("click", () => { g.sel = i; render(); });
-      else row.addEventListener("click", () => {                       // 답한 줄을 눌러 고치기
-        if (i === g.sel) return;
-        g.answers[g.sel] = digits; g.sel = i; digits = g.answers[i]; tap(8); syncPad(); render();
-      });
-      list.appendChild(row);
-    });
-    stage.appendChild(list);
+    // 위: 숫자 (외우기: 그대로 / 입력: 친 만큼 채워지는 자리 / 결과: 문제와 ○✗)
+    const num = document.createElement("div");
+    num.className = "gnum";
+    if (g.stage === "study") num.innerHTML = groupedHtml(g.number);
+    else if (g.stage === "answer") num.innerHTML = groupedHtml(digits.padEnd(g.number.length, "·")).replaceAll("·", '<span class="ph">·</span>');
+    else num.innerHTML = groupedHtml(g.number) + `<span class="gmark ${g.answer === g.number ? "ok" : "ng"}">${g.answer === g.number ? "○" : "✗"}</span>`;
+    stage.appendChild(num);
 
-    // 아래: 카드 또는 안내
     if (g.stage === "study") {
+      const desc = document.createElement("div");                  // 페그 설명 한 줄
+      desc.className = "gdesc";
+      desc.innerHTML = keys.map((k) => `<span><b>${k}</b>${escapeHtml(PEGS[k] || "?")}</span>`).join('<span class="dot"> · </span>');
+      stage.appendChild(desc);
       stage.appendChild(levelRow({
         label: ladderLabel(g.level),
         prev: g.level > 1 ? () => newGame(g.level - 1) : null,
@@ -599,24 +599,27 @@
         resetLabel: "L1부터",
       }));
       const cards = document.createElement("div");                 // 늘 카드와 함께 외운다
-      cards.className = "gcards";
-      fillCards(cards, chunk(g.problems[g.sel]));
+      cards.className = "gcards" + (keys.length > 3 ? " many" : "");
+      fillCards(cards, keys);
       stage.appendChild(cards);
-      display.innerHTML = '<span class="ph">외웠으면 ⏎ → 입력 시작</span>';
+      display.innerHTML = '<span class="ph">외웠으면 ⏎ → 입력</span>';
     } else if (g.stage === "answer") {
       stage.insertAdjacentHTML("beforeend",
-        `<div class="gmsg"><b>${g.sel + 1}번 숫자를 키패드로 치세요</b>` +
-        `치고 ⏎ → 다음 번호. 틀린 줄은 눌러서 다시 입력<br>빈 줄에서 ⌫ 는 이전 줄로</div>`);
-      display.innerHTML = (digits ? groupedHtml(digits) : `<span class="ph">${g.sel + 1}번 답</span>`) + '<span class="caret"></span>';
+        `<div class="gmsg"><b>외운 숫자를 키패드로 치세요</b>${g.number.length}자리 다 치고 ⏎ · ⌫ 로 지우기</div>`);
+      display.innerHTML = (digits ? groupedHtml(digits) : '<span class="ph">답 입력</span>') + '<span class="caret"></span>';
     } else {
-      const score = g.problems.filter((p, i) => g.answers[i] === p).length;
+      const ans = document.createElement("div");
+      ans.className = "gnum ans";
+      ans.innerHTML = diffHtml(g.number, g.answer);
+      stage.appendChild(ans);
       const cards = document.createElement("div");
-      cards.className = "gcards";
-      fillCards(cards, chunk(g.problems[g.sel]));
+      cards.className = "gcards" + (keys.length > 3 ? " many" : "");
+      fillCards(cards, keys);
       stage.appendChild(cards);
-      const perfect = score === g.count;
-      display.innerHTML = `<span class="score-inline">${score} / ${g.count}</span>` +
-        `<span class="ph">&nbsp; ⏎ ${perfect ? (g.level < LADDER.length ? `L${g.level + 1}로` : "최고 단계!") : `L${g.level} 다시`}</span>`;
+      const perfect = g.answer === g.number;
+      display.innerHTML = perfect
+        ? `<span class="score-inline">정답 🎉</span><span class="ph">&nbsp; ⏎ ${g.level < LADDER.length ? `L${g.level + 1}로` : "최고 단계 다시"}</span>`
+        : `<span class="score-inline ng">아깝다</span><span class="ph">&nbsp; ⏎ L${g.level} 다시</span>`;
     }
   }
 
@@ -625,36 +628,59 @@
     if (key === "clear") { tap(20); newGame(); return; }
 
     if (g.stage === "study") {
-      if (key === "enter") { g.stage = "answer"; g.sel = 0; digits = ""; tap(16); }
+      if (key === "enter") { g.stage = "answer"; digits = ""; tap(16); }
       else { tap(30); display.innerHTML = '<span class="ph">먼저 ⏎ 를 눌러야 입력할 수 있어요</span>'; return; }
     } else if (g.stage === "answer") {
-      if (key === "back") {
-        if (digits) { digits = digits.slice(0, -1); tap(8); }
-        else if (g.sel > 0) { g.answers[g.sel] = ""; g.sel--; digits = g.answers[g.sel]; tap(8); }   // 빈 줄에서 ⌫ = 이전 줄로
-        else return;
-      }
+      if (key === "back") { if (!digits) return; digits = digits.slice(0, -1); tap(8); }
       else if (key === "enter") {
         if (!digits) { tap(30); return; }
-        g.answers[g.sel] = digits;
-        digits = "";
-        let next = -1;                                                   // 다음 빈 줄 (뒤에서 찾고, 없으면 앞에서)
-        for (let k = 1; k <= g.count; k++) { const j = (g.sel + k) % g.count; if (!g.answers[j]) { next = j; break; } }
-        if (next < 0) { g.stage = "result"; g.sel = 0; }
-        else g.sel = next;
-        tap(16);
+        g.answer = digits; digits = ""; g.stage = "result"; tap(16);
+        if (g.answer === g.number) celebrate();
       } else {
-        if (digits.length >= MAX_DIGITS) { tap(30); return; }
+        if (digits.length >= g.number.length) { tap(30); return; }
         digits += key; tap(8);
       }
     } else {
-      if (key === "enter") {
-        const score = g.problems.filter((p, i) => g.answers[i] === p).length;
-        tap(16); newGame(score === g.count ? g.level + 1 : g.level); return;
-      }
+      if (key === "enter") { tap(16); newGame(g.answer === g.number ? g.level + 1 : g.level); return; }
       tap(30); return;
     }
     syncPad();
     render();
+  }
+
+  /* ── 축하: 하늘에서 색종이 ────────────────────────── */
+  function celebrate() {
+    tap([30, 40, 30, 40, 80]);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const c = document.createElement("canvas");
+    c.className = "confetti";
+    document.body.appendChild(c);
+    const ctx = c.getContext("2d");
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    const W = innerWidth, H = innerHeight;
+    c.width = W * dpr; c.height = H * dpr; ctx.scale(dpr, dpr);
+    const colors = ["#e2bb60", "#ff7a7a", "#6fd39a", "#7fb3ff", "#f7f0dc", "#c9a0ff", "#ffb347"];
+    const ps = Array.from({ length: 160 }, () => ({
+      x: Math.random() * W, y: -20 - Math.random() * H * 0.8,
+      w: 6 + Math.random() * 6, h: 9 + Math.random() * 9,
+      vy: 2.2 + Math.random() * 3, vx: (Math.random() - .5) * 1.4,
+      rot: Math.random() * Math.PI, vr: (Math.random() - .5) * .25, sway: Math.random() * Math.PI * 2,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    }));
+    const t0 = performance.now(), DUR = 3400;
+    (function frame(t) {
+      const el = t - t0;
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalAlpha = el > DUR - 700 ? Math.max(0, (DUR - el) / 700) : 1;
+      for (const p of ps) {
+        p.sway += .06; p.x += p.vx + Math.sin(p.sway) * 1.3; p.y += p.vy; p.rot += p.vr;
+        if (p.y > H + 20) { p.y = -20; p.x = Math.random() * W; }
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.max(.2, Math.abs(Math.cos(p.sway))));
+        ctx.restore();
+      }
+      if (el < DUR) requestAnimationFrame(frame); else c.remove();
+    })(t0);
   }
 
   /* 레벨 조절 줄: ◀ 이전 · 초기화 · 다음 ▶ */
@@ -750,6 +776,7 @@
     const o = obj;
     stage.classList.add("game", "obj");
     stage.classList.remove("free");
+    display.classList.remove("long");
     stage.innerHTML = "";
     delete stage.dataset.n;
 
@@ -812,7 +839,7 @@
     } else {
       const score = o.seq.filter((e, i) => o.picks[i] === e).length;
       const perfect = score === o.level;
-      display.innerHTML = `<span class="score-inline">${score} / ${o.level}</span>` +
+      display.innerHTML = `<span class="score-inline${perfect ? "" : " ng"}">${perfect ? "정답 🎉" : `${score} / ${o.level}`}</span>` +
         `<span class="ph">&nbsp; ⏎ ${perfect ? (o.level < MAX_LEVEL ? `다음 ${o.level + 1}개` : "최고 단계!") : `${o.level}개 다시`}</span>`;
     }
   }
@@ -825,7 +852,7 @@
       else { tap(30); return; }
     } else if (o.stage === "play") {
       if (key === "back") { if (!o.picks.length) return; o.picks.pop(); tap(8); }
-      else if (key === "enter") { o.stage = "result"; tap(16); }
+      else if (key === "enter") { o.stage = "result"; tap(16); if (o.seq.every((e, i) => o.picks[i] === e)) celebrate(); }
       else if (key.startsWith("e:")) {
         if (o.picks.length >= o.level) { tap(30); return; }
         o.picks.push(key.slice(2)); tap(8);
@@ -899,7 +926,7 @@
     if (game) {
       const typing = game.stage === "answer";
       // 외우기 단계에서도 숫자키는 살려 둔다 — 누르면 "먼저 ⏎" 안내가 뜬다
-      nums.forEach((b) => { b.disabled = game.stage === "result" || (typing && digits.length >= MAX_DIGITS); });
+      nums.forEach((b) => { b.disabled = game.stage === "result" || (typing && digits.length >= game.number.length); });
       back.disabled = !typing || !digits;
       resetBtn.disabled = false;                             // 게임에서는 ↻ = 새 문제
       return;
@@ -971,7 +998,7 @@
     modeBtn.title = quiz ? "숫자를 다 누르고 ⏎ 를 눌러야 그림이 열립니다" : "누르는 대로 바로 그림이 열립니다";
     modeBtn.hidden = !!(game || obj);
     gameBtn.setAttribute("aria-pressed", String(!!game));
-    gameBtn.title = game ? "게임1 끝내기" : "게임1: 숫자 외우기 (4자리 하나부터 5자리 넷까지)";
+    gameBtn.title = game ? "게임1 끝내기" : "게임1: 무작위 숫자 외우기 (6자리부터 10자리까지)";
   }
   modeBtn.addEventListener("click", () => {
     quiz = !quiz;
