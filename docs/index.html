@@ -514,36 +514,36 @@
     });
   }
 
-  /* ── 게임1: 무작위 숫자 하나 외우기 (6자리 → 10자리) ── */
-  const LADDER = [6, 7, 8, 9, 10];                              // 레벨별 자릿수
-  const ladderLabel = (lv) => `L${lv} · ${LADDER[lv - 1]}자리`;
+  /* ── 게임1: 무작위 숫자 하나 외우기 (6~10자리가 번갈아, 6자리가 자주) ── */
+  const LENGTH_WEIGHTS = { 6: 40, 7: 20, 8: 15, 9: 15, 10: 10 };   // 자릿수별 뽑힐 비중(%)
+  function randomLength() {
+    let r = Math.random() * Object.values(LENGTH_WEIGHTS).reduce((a, b) => a + b, 0);
+    for (const [len, w] of Object.entries(LENGTH_WEIGHTS)) { if ((r -= w) < 0) return Number(len); }
+    return 6;
+  }
   function randomNumber(len) {
     let s = String(1 + Math.floor(Math.random() * 9));          // 첫 자리는 0 제외
     while (s.length < len) s += String(Math.floor(Math.random() * 10));
     return s;
   }
 
-  /* 진행 중인 문제를 저장해 두고, 나갔다 와도 ↻ 나 "L1부터"를 누르기 전엔 같은 숫자를 이어간다 */
+  /* 진행 중인 문제를 저장해 두고, 나갔다 와도 ↻ 를 누르기 전엔 같은 숫자를 이어간다 */
   function saveGame() {
-    if (game) localStorage.setItem("peg.game", JSON.stringify({ level: game.level, number: game.number }));
+    if (game) localStorage.setItem("peg.game", JSON.stringify({ number: game.number }));
   }
   function resumeGame() {
     try {
       const d = JSON.parse(localStorage.getItem("peg.game") || "null");
-      if (!d || !LADDER[d.level - 1] || typeof d.number !== "string") return false;
-      if (!/^[1-9]\d*$/.test(d.number) || d.number.length !== LADDER[d.level - 1]) return false;
-      game = { stage: "study", level: d.level, number: d.number, answer: "" };
-      localStorage.setItem("peg.level1", String(d.level));
+      if (!d || typeof d.number !== "string" || !/^[1-9]\d*$/.test(d.number) || !LENGTH_WEIGHTS[d.number.length]) return false;
+      game = { stage: "study", number: d.number, answer: "" };
       digits = ""; syncHeader(); syncPad(); render();
       return true;
     } catch { return false; }
   }
 
-  function newGame(level) {
-    if (level === undefined) level = game ? game.level : Number(localStorage.getItem("peg.level1") || 1);
-    level = Math.min(Math.max(1, level), LADDER.length);
-    localStorage.setItem("peg.level1", String(level));
-    game = { stage: "study", level, number: randomNumber(LADDER[level - 1]), answer: "" };   // study → answer → result
+  /* len 을 주면 그 자릿수로, 아니면 비중대로 무작위 자릿수 */
+  function newGame(len) {
+    game = { stage: "study", number: randomNumber(len || randomLength()), answer: "" };   // study → answer → result
     saveGame();
     digits = "";
     syncHeader();
@@ -591,18 +591,11 @@
       desc.className = "gdesc";
       desc.innerHTML = keys.map((k) => `<span><b>${k}</b>${escapeHtml(PEGS[k] || "?")}</span>`).join('<span class="dot"> · </span>');
       stage.appendChild(desc);
-      stage.appendChild(levelRow({
-        label: ladderLabel(g.level),
-        prev: g.level > 1 ? () => newGame(g.level - 1) : null,
-        reset: g.level > 1 ? () => newGame(1) : null,
-        next: g.level < LADDER.length ? () => newGame(g.level + 1) : null,
-        resetLabel: "L1부터",
-      }));
       const cards = document.createElement("div");                 // 늘 카드와 함께 외운다
       cards.className = "gcards" + (keys.length > 3 ? " many" : "");
       fillCards(cards, keys);
       stage.appendChild(cards);
-      display.innerHTML = '<span class="ph">외웠으면 ⏎ → 입력</span>';
+      display.innerHTML = `<span class="score-inline">${g.number.length}자리</span><span class="ph">&nbsp; 외웠으면 ⏎</span>`;
     } else if (g.stage === "answer") {
       stage.insertAdjacentHTML("beforeend",
         `<div class="gmsg"><b>외운 숫자를 키패드로 치세요</b>${g.number.length}자리 다 치고 ⏎ · ⌫ 로 지우기</div>`);
@@ -618,8 +611,8 @@
       stage.appendChild(cards);
       const perfect = g.answer === g.number;
       display.innerHTML = perfect
-        ? `<span class="score-inline">정답 🎉</span><span class="ph">&nbsp; ⏎ ${g.level < LADDER.length ? `L${g.level + 1}로` : "최고 단계 다시"}</span>`
-        : `<span class="score-inline ng">아깝다</span><span class="ph">&nbsp; ⏎ L${g.level} 다시</span>`;
+        ? '<span class="score-inline">정답 🎉</span><span class="ph">&nbsp; ⏎ 다음 숫자</span>'
+        : `<span class="score-inline ng">아깝다</span><span class="ph">&nbsp; ⏎ ${g.number.length}자리 다시</span>`;
     }
   }
 
@@ -641,7 +634,7 @@
         digits += key; tap(8);
       }
     } else {
-      if (key === "enter") { tap(16); newGame(g.answer === g.number ? g.level + 1 : g.level); return; }
+      if (key === "enter") { tap(16); newGame(g.answer === g.number ? undefined : g.number.length); return; }   // 틀리면 같은 자릿수로 다시
       tap(30); return;
     }
     syncPad();
@@ -998,7 +991,7 @@
     modeBtn.title = quiz ? "숫자를 다 누르고 ⏎ 를 눌러야 그림이 열립니다" : "누르는 대로 바로 그림이 열립니다";
     modeBtn.hidden = !!(game || obj);
     gameBtn.setAttribute("aria-pressed", String(!!game));
-    gameBtn.title = game ? "게임1 끝내기" : "게임1: 무작위 숫자 외우기 (6자리부터 10자리까지)";
+    gameBtn.title = game ? "게임1 끝내기" : "게임1: 무작위 숫자 외우기 (6~10자리가 번갈아 나옴)";
   }
   modeBtn.addEventListener("click", () => {
     quiz = !quiz;
