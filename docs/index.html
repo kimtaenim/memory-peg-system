@@ -117,9 +117,11 @@
   .gcards.many .card .label { font-size: clamp(11px, 3.2vw, 15px); line-height: 1.2; text-align: center;
     white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   /* 게임1 위쪽 숫자 줄 */
-  .gnum { flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25em .4em;
+  .gnum { flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0;
     font-size: clamp(22px, 7vw, 34px); font-weight: 900; letter-spacing: .06em; font-variant-numeric: tabular-nums; padding: 2px 0; }
   .gnum .grp:nth-child(even) { color: var(--gold); }
+  .gnum .plain { letter-spacing: .04em; white-space: nowrap; }
+  .gnum .plain.ph { margin-left: 0; }
   .gnum .ph { color: #4d4488; }
   .gnum .ok { color: #6fd39a; } .gnum .ng { color: #ff7a7a; }
   .gnum .gmark { font-size: .8em; margin-left: .2em; }
@@ -561,13 +563,11 @@
     render();
   }
 
-  /* 답을 문제 자리마다 견줘서 맞은 자리는 초록, 틀린 자리는 빨강 (문제와 같은 묶음으로) */
+  /* 답을 문제 자리마다 견줘서 맞은 자리는 초록, 틀린 자리는 빨강 (문제처럼 붙여 쓴다) */
   function diffHtml(problem, answer) {
-    let pos = 0;
-    return chunk(problem).map((c) => {
-      const inner = [...c].map((ch) => { const a = answer[pos++]; return `<span class="${a === ch ? "ok" : "ng"}">${a ?? "·"}</span>`; }).join("");
-      return `<span class="grp">${inner}</span>`;
-    }).join("");
+    return '<span class="plain">' +
+      [...problem].map((ch, i) => { const a = answer[i]; return `<span class="${a === ch ? "ok" : "ng"}">${a ?? "·"}</span>`; }).join("") +
+      "</span>";
   }
 
   function renderGame() {
@@ -581,9 +581,10 @@
     // 위: 숫자 (외우기: 그대로 / 입력: 친 만큼 채워지는 자리 / 결과: 문제와 ○✗)
     const num = document.createElement("div");
     num.className = "gnum";
-    if (g.stage === "study") num.innerHTML = groupedHtml(g.number);
-    else if (g.stage === "answer") num.innerHTML = groupedHtml(digits.padEnd(g.number.length, "·")).replaceAll("·", '<span class="ph">·</span>');
-    else num.innerHTML = groupedHtml(g.number) + `<span class="gmark ${g.answer === g.number ? "ok" : "ng"}">${g.answer === g.number ? "○" : "✗"}</span>`;
+    // 출제 숫자는 묶지 않고 한 색으로 붙여 쓴다 — 긴 숫자 그대로의 느낌으로 외우게
+    if (g.stage === "study") num.innerHTML = `<span class="plain">${g.number}</span>`;
+    else if (g.stage === "answer") num.innerHTML = `<span class="plain">${digits}</span><span class="plain ph">${"·".repeat(g.number.length - digits.length)}</span>`;
+    else num.innerHTML = `<span class="plain">${g.number}</span><span class="gmark ${g.answer === g.number ? "ok" : "ng"}">${g.answer === g.number ? "○" : "✗"}</span>`;
     stage.appendChild(num);
 
     if (g.stage === "study") {
