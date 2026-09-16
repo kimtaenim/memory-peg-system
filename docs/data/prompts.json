@@ -279,7 +279,14 @@
       "prompt": "A dashing aviator — leather flying jacket, white silk scarf, goggles pushed up on a leather helmet — standing on the wing of an old biplane with one hand on the propeller, wind whipping the scarf, clouds rolling below the wheels, a languid heavy-lidded gaze at the viewer"
     },
     "82": {
-      "prompt": "The White Rabbit from Alice in Wonderland in a frantic hurry: a tall white rabbit in a waistcoat and frock coat, clutching a huge gold pocket watch and staring at it in panic, sprinting headlong down a ruined staircase on his hind legs, ears and coat-tails streaming straight back, a cloud of dust at his heels; dragged along in his slipstream, floating in mid-air, come a tray of teacups, a stack of papers, a top hat and a little girl in a blue dress and white apron reaching after him. Everything leans forward into the run; the watch is enormous"
+      "prompt": "The White Rabbit from Alice in Wonderland in a frantic hurry: a tall white rabbit with exactly two long ears, in a waistcoat and frock coat, clutching a huge gold pocket watch and staring at it in panic, sprinting headlong down a ruined staircase on his hind legs, ears and coat-tails streaming straight back, a cloud of dust at his heels; dragged along in his slipstream, floating in mid-air, come a tray of teacups, a stack of papers, a top hat and a little girl in a blue dress and white apron reaching after him. Everything leans forward into the run; the watch is enormous",
+      "edit": "Fix the rabbit's ears: the rabbit must have exactly TWO long white ears streaming back from the top of its head, no third ear. Remove the extra ear and repaint that spot with the same background (the ruined arches and stairs). Keep the same ink-outlined storybook style",
+      "editMask": {
+        "x": 0.22,
+        "y": 0.1,
+        "w": 0.45,
+        "h": 0.25
+      }
     },
     "83": {
       "prompt": "A skimpy bright red thong — a tiny triangle of cloth on thin string straps — pegged to a clothesline and snapping in the wind like a banner, a blushing plump moustached man in a bathrobe stretching up on tiptoe to grab it, a sun peeking out between its fingers in mock shock"
