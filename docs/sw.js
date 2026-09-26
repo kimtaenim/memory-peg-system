@@ -60,15 +60,16 @@ self.addEventListener("fetch", (e) => {
     return;
   }
   if (isShell) {
-    // 네트워크 우선, 실패하면 캐시
+    // 네트워크 우선, 실패하면 캐시. 캐시 키는 쿼리(?t=)를 뗀 경로로 통일한다
+    const key = new Request(url.origin + url.pathname);
     e.respondWith(caches.open(CACHE).then(async (c) => {
       try {
         // 브라우저 HTTP 캐시(Pages 는 10분)를 건너뛰고 서버에 직접 확인한다 — 고친 앱이 바로 뜨게
         const res = await fetch(new Request(req.url, { cache: "no-cache" }));
-        if (res.ok) c.put(req, res.clone());
+        if (res.ok) c.put(key, res.clone());
         return res;
       } catch {
-        return (await c.match(req)) || (await c.match("./index.html"));
+        return (await c.match(key)) || (await c.match("./index.html"));
       }
     }));
     return;

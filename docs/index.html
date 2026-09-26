@@ -1023,7 +1023,9 @@
   syncHeader();
   stage.innerHTML = '<div id="hint"><div class="big">페그 목록을 불러오는 중…</div></div>';
   try {
-    const [res, eres] = await Promise.all([fetch(PEGS_URL, { cache: "no-cache" }), fetch("data/emoji.json", { cache: "no-cache" })]);
+    // ?t= 는 Pages CDN 의 10분 캐시까지 건너뛰려는 것. 서비스 워커는 쿼리를 떼고 저장하므로 오프라인에서도 찾는다.
+    const bust = (u) => `${u}?t=${Date.now()}`;
+    const [res, eres] = await Promise.all([fetch(bust(PEGS_URL), { cache: "no-cache" }), fetch(bust("data/emoji.json"), { cache: "no-cache" })]);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     PEGS = await res.json();
     EMOJI = eres.ok ? await eres.json() : [];
