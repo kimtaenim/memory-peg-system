@@ -71,12 +71,15 @@
     font: inherit; font-size: clamp(11px, 3vw, 14px); font-weight: 700; cursor: pointer;
   }
   #mode[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
-  .hbtns { display: flex; gap: 6px; }
+  .hbtns { display: flex; gap: 6px; flex: 0 0 auto; }
   .hbtns button {
     appearance: none; border: 1px solid var(--edge); background: var(--panel);
-    color: var(--ink); border-radius: 999px; padding: 6px 14px;
+    color: var(--ink); border-radius: 999px; padding: 6px 14px; white-space: nowrap;
     font: inherit; font-size: clamp(11px, 3vw, 14px); font-weight: 700; cursor: pointer;
   }
+  /* 제목은 한 줄로, 버튼 세 개가 다 들어가게. 좁은 폰에서는 부제를 숨긴다 */
+  .brand { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 480px) { body:not(.ingame) .brand .sub { display: none; } }
   .hbtns button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
   .hbtns button[hidden] { display: none; }
 
@@ -132,6 +135,7 @@
   .gdesc b { color: var(--gold); font-variant-numeric: tabular-nums; margin-right: .25em; }
   .gdesc .dot { color: #4d4488; }
   #display .score-inline.ng { color: #ff7a7a; }
+  #display .ph.qh { font-size: .45em; letter-spacing: 0; align-self: center; }
   #display { overflow: hidden; white-space: nowrap; }
   #display.long { font-size: clamp(16px, 5vw, 26px); letter-spacing: 0; gap: .18em; }
   /* 축하 색종이 */
@@ -468,7 +472,7 @@
     const cap = document.createElement("div");
     cap.className = "cap";
     cap.innerHTML = `<span class="num">${key}</span>` +
-                    `<span class="label">${hide ? "???" : escapeHtml(label)}</span>`;
+                    `<span class="label">${hide ? "눌러서 보기" : escapeHtml(label)}</span>`;
 
     card.append(pic, cap);
     if (onClick) card.addEventListener("click", onClick);
@@ -491,7 +495,10 @@
     display.classList.remove("long");
     const chunks = chunk(digits);
 
-    display.innerHTML = chunks.length ? groupedHtml(digits) : '<span class="ph">숫자를 누르세요</span>';
+    const anyHidden = quiz && chunks.some((_, i) => !revealed.has(i));
+    display.innerHTML = chunks.length
+      ? groupedHtml(digits) + (anyHidden ? '<span class="ph qh">&nbsp;⏎ 공개</span>' : "")
+      : `<span class="ph">${quiz ? "퀴즈: 숫자 치고 ⏎" : "숫자를 누르세요"}</span>`;
 
     stage.innerHTML = "";
     stage.dataset.n = String(chunks.length);
