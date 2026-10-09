@@ -1009,8 +1009,13 @@
     render();
   });
   const goHome = () => {
-    if (!game && !obj) return;
-    tap(10); obj = null; game = null; digits = ""; buildPad(); syncHeader(); syncPad(); render();
+    tap(10);
+    if (!game && !obj) {                     // 이미 첫 화면: 퀴즈를 끄고 입력을 비워 "숫자 누르면 바로 그림" 상태로
+      quiz = false; localStorage.setItem("peg.quiz", "0");
+      digits = ""; revealed.clear(); syncHeader(); syncPad(); render();
+      return;
+    }
+    obj = null; game = null; digits = ""; buildPad(); syncHeader(); syncPad(); render();
   };
   document.getElementById("homebtn").addEventListener("click", goHome);
   document.getElementById("home2").addEventListener("click", goHome);
