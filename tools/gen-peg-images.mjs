@@ -111,9 +111,13 @@ const buildPrompt = (key) => {
 };
 
 /* 편집 지시문: 참조 그림이 화풍을 들고 있으니 덱 공통 문장은 붙이지 않고, 나머지는 그대로 두라고만 덧붙인다 */
-const buildEditPrompt = (key) =>
-  `${ITEMS[key].edit.trim().replace(/\.$/, "")}. Keep everything else in the picture exactly as it is: the same figure, pose, face, colours, `
-  + `line style, border, background and the number banner at the bottom. No new text or numerals.`;
+/* 마스크가 있을 때만 "나머지는 그대로" 를 덧붙인다. 마스크 없이 참조(사진 등)를 통째로 다시 그릴 때는 지시문만 보낸다 */
+const buildEditPrompt = (key) => {
+  const base = ITEMS[key].edit.trim().replace(/\.$/, "");
+  if (!ITEMS[key].editMask) return base + ".";
+  return `${base}. Keep everything else in the picture exactly as it is: the same figure, pose, face, colours, `
+    + `line style, border, background and the number banner at the bottom. No new text or numerals.`;
+};
 const refPath = (key) => {
   const item = ITEMS[key];
   if (item.ref) return path.resolve(ROOT, item.ref);
