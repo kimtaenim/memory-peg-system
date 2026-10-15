@@ -423,12 +423,10 @@
   let EMOJI = [];                       // 사물 이모지 풀 (data/emoji.json)
   const objBtn = document.getElementById("objbtn");
 
-  /* 8396 → ["83","96"],  542 → ["5","42"] : 홀수면 맨 앞만 한 자리 */
+  /* 8396 → ["83","96"],  542 → ["54","2"],  68800 → ["68","80","0"] : 앞에서부터 두 자리씩, 홀수면 맨 뒤만 한 자리 */
   function chunk(s) {
     const out = [];
-    let i = 0;
-    if (s.length % 2 === 1) { out.push(s[0]); i = 1; }
-    for (; i < s.length; i += 2) out.push(s.slice(i, i + 2));
+    for (let i = 0; i < s.length; i += 2) out.push(s.slice(i, i + 2));
     return out;
   }
 
@@ -508,8 +506,8 @@
           '<div class="big">숫자를 누르면 그림이 뜹니다</div>' +
           '<div class="sub">한 자리는 숫자의 <b>모양</b>, 두 자리는 숫자의 <b>소리</b>로 페그를 정했습니다<br><br>' +
           '<b>8396</b> → 빨간 삼각팬티 + 구루<br>' +
-          '<b>542</b> → 갈고리 + 싸이<br>' +
-          '홀수 자리는 맨 앞 한 자리부터 끊습니다</div>' +
+          '<b>542</b> → 옥자(슈퍼돼지) + 백조<br>' +
+          '앞에서부터 두 자리씩 끊고, 홀수면 맨 뒤 한 자리가 남습니다</div>' +
         '</div>';
       return;
     }
