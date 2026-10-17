@@ -105,7 +105,7 @@
       "prompt": "The wrath of the Lich King: an undead sorcerer-king rising from a throne of black ice, a horned crown-helm with two points of cold blue fire burning where the eyes should be, pale dead skin, long white hair, black plate armour crusted with frost, one skeletal gauntlet raised in fury and the other gripping a huge runed sword that glows icy blue. Frost mist pours down the throne steps, the ruins around him are frozen and shattered, a horde of faint skeletal shapes stirs in the dark behind. Menacing and majestic; no gore"
     },
     "28": {
-      "prompt": "A grinning row of enormous white teeth floating in darkness, one gold tooth glinting, a tiny ladder leaning against them"
+      "prompt": "A faceless young woman with a black bob haircut — straight heavy bangs and two short low pigtails sticking out at the sides — and round thin wire glasses floating where her eyes should be; the face behind the glasses is a smooth blank with no eyes, no nose, no features at all except an enormous, brilliant, wide-open grin of big white teeth, every tooth bright and sharply drawn, the teeth the brightest thing on the card. She wears a loose bright orange hooded sweatshirt and leans toward the viewer among the ruins. Uncanny and cheerful at once. The teeth are the clear focus"
     },
     "29": {
       "prompt": "A green iguana with a spined crest perched on a stone ledge, its dewlap fanned wide, one round eye fixed on the viewer"
@@ -231,8 +231,8 @@
       "prompt": "An allegory of carnal desire: two languid figures, a man and a woman, entwined in heavy flowing drapery that clings and covers them, faces close, eyes half closed, fingers tangled in each other's hair, a spilled goblet of wine and crushed roses at their feet. Sensual and heavy with longing in the manner of Klimt and Khnopff, but clothed and never explicit — nothing bare beyond faces, arms and shoulders"
     },
     "67": {
-      "prompt": "A grim scene of a young East Asian man in traditional Chinese robes — a slender, handsome youth with his hair tied up — being dragged toward the execution ground by two grim guards in black, his wrists bound with rope, his head turned back over his shoulder in dread; ahead of them the shadow of a wooden scaffold and a raised axe falls across the ruined courtyard, an official in dark robes holds a scroll of the sentence, crows circle above and onlookers in the shadows turn their faces away. No body, no blood, no wounds: only the dread of what is coming",
-      "solemn": true
+      "prompt": "An absurd toy creature built from blue plastic building bricks in the shape of the number 67: a blocky blue 6 and a blocky blue 7 standing side by side as one body, each digit with a single round white cartoon eye with a black pupil, a pair of white gloved cartoon hands at the sides, and two short pale-blue brick legs ending in white boots, posed like a small robot standing among the ruins, lit from the front. Glimpsed half-hidden in the shadows and arches behind it, other absurd meme creatures of the same kind: a shark wearing sneakers, a crocodile with the body of a bomber plane, a ballerina whose head is a cappuccino cup, a wooden log-man holding a baseball bat. The 67 figure fills the front of the card",
+      "digits": true
     },
     "68": {
       "prompt": "A bald bespectacled scholar cradling an enormous history book, tiny hunters, farmers and machines marching out of its open pages"
